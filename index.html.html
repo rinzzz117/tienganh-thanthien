@@ -1,0 +1,3057 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnhNgữ Studio — Học Từ Vựng Tiếng Anh & Quản Lý Chủ Đề</title>
+
+  <!-- Google Fonts: Be Vietnam Pro (Giao diện & Tiếng Việt) & JetBrains Mono (Phiên âm IPA & Mã) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Thiết lập font mặc định và bảng màu nền sáng hiện đại, dễ đọc */
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+
+    .font-ipa {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Hiệu ứng lật thẻ 3D mượt mà cho chế độ Flashcard */
+    .perspective-1200 {
+      perspective: 1200px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Ẩn thanh cuộn ngang cho danh sách chủ đề trên thiết bị di động */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Hiệu ứng rung nhẹ khi trả lời sai */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.38s ease-in-out;
+    }
+
+    /* Hiệu ứng xuất hiện mượt */
+    @keyframes popIn {
+      0% { transform: scale(0.96); opacity: 0.6; }
+      65% { transform: scale(1.015); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.28s ease-out forwards;
+    }
+
+    /* Hiệu ứng sóng âm khi đang phát âm thanh */
+    @keyframes pulseWave {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45); }
+      70% { box-shadow: 0 0 0 11px rgba(79, 70, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+    .speaking-active {
+      animation: pulseWave 1.15s infinite;
+      background-color: #4F46E5 !important;
+      color: #FFFFFF !important;
+      border-color: #4F46E5 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- Họa tiết nền trang trí nhẹ nhàng -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-28 -left-24 w-96 h-96 rounded-full bg-indigo-200/35 blur-3xl"></div>
+    <div class="absolute top-1/3 -right-24 w-80 h-80 rounded-full bg-emerald-200/35 blur-3xl"></div>
+    <div class="absolute -bottom-28 left-1/3 w-96 h-96 rounded-full bg-slate-200/50 blur-3xl"></div>
+  </div>
+
+  <!-- ================= HEADER, CHỌN GIỌNG ĐỌC & SAO LƯU JSON ================= -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+
+        <!-- Logo & Tên ứng dụng -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+              <!-- Biểu tượng sách học thuật hiện đại -->
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                AnhNgữ Studio
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">ENGLISH</span>
+              </h1>
+              <p class="text-xs text-slate-500 hidden sm:block">Học từ vựng tiếng Anh chuẩn IPA & quản lý chủ đề không giới hạn</p>
+            </div>
+          </div>
+
+          <!-- Bộ chọn giọng US/UK & Nút Sao lưu JSON trên Mobile/Tablet -->
+          <div class="flex lg:hidden items-center gap-1.5">
+            <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/70" role="group" aria-label="Chọn giọng đọc">
+              <button onclick="setVoiceAccent('en-US')" class="accent-btn-us px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer bg-white text-indigo-700 shadow-xs">🇺🇸 US</button>
+              <button onclick="setVoiceAccent('en-GB')" class="accent-btn-uk px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer text-slate-500 hover:text-slate-800">🇬🇧 UK</button>
+            </div>
+            <button onclick="openJsonModal()" title="Sao lưu / Khôi phục JSON" class="p-2 rounded-xl text-slate-600 hover:text-indigo-700 bg-white border border-slate-200/80 shadow-2xs transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Thanh tiến độ, Bộ chọn giọng đọc US/UK & Nút Sao lưu JSON (Desktop) -->
+        <div class="flex items-center gap-2.5 sm:gap-3 flex-1 lg:max-w-2xl justify-end">
+          <!-- Thanh tiến độ tổng quát -->
+          <div class="flex-1 bg-slate-50/90 rounded-2xl px-3.5 py-2 border border-slate-200/80">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="font-semibold text-slate-600">Tiến độ đã thuộc</span>
+              <span class="font-bold text-indigo-700">
+                <span id="learnedCountText">0</span>/<span id="totalCountText">66</span> từ (<span id="progressPercentText">0</span>%)
+              </span>
+            </div>
+            <div class="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+              <div id="headerProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Bộ chọn giọng đọc Anh-Mỹ (US) / Anh-Anh (UK) trên Desktop -->
+          <div class="hidden lg:inline-flex items-center rounded-2xl bg-slate-100 p-1 border border-slate-200/80 shrink-0" title="Chọn giọng phát âm tiếng Anh">
+            <button onclick="setVoiceAccent('en-US')" class="accent-btn-us px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-indigo-700 shadow-xs">
+              🇺🇸 Anh-Mỹ
+            </button>
+            <button onclick="setVoiceAccent('en-GB')" class="accent-btn-uk px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+              🇬🇧 Anh-Anh
+            </button>
+          </div>
+
+          <!-- Nút Sao lưu / Khôi phục JSON trên Desktop -->
+          <button onclick="openJsonModal()" class="hidden lg:inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-indigo-700 hover:border-indigo-200 hover:bg-indigo-50/60 bg-white px-3.5 py-2.5 rounded-2xl border border-slate-200/80 shadow-2xs transition cursor-pointer shrink-0">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            <span>Sao lưu / Khôi phục JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thanh điều hướng 4 chế độ học -->
+      <nav class="mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/60">
+        <button id="tab-flashcards" onclick="switchMode('flashcards')" class="nav-tab flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer bg-white text-indigo-700 shadow-xs">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span>Thẻ ghi nhớ</span>
+        </button>
+        <button id="tab-quiz" onclick="switchMode('quiz')" class="nav-tab flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-indigo-700 transition-all cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Trắc nghiệm</span>
+        </button>
+        <button id="tab-dictation" onclick="switchMode('dictation')" class="nav-tab flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-indigo-700 transition-all cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          <span>Nghe & Viết</span>
+        </button>
+        <button id="tab-library" onclick="switchMode('library')" class="nav-tab flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-indigo-700 transition-all cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span>Kho từ vựng</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= BỘ LỌC & QUẢN LÝ CHỦ ĐỀ KHÔNG GIỚI HẠN ================= -->
+  <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-2">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Chủ đề học tập</span>
+        <span id="topicCountSummary" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">6 chủ đề</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="speechStatusBadge" class="hidden text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+          ⚠️ Thiếu giọng đọc tiếng Anh
+        </span>
+        <button onclick="openTopicManagerModal('create')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          <span>Thêm chủ đề</span>
+        </button>
+        <button onclick="openTopicManagerModal('list')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200/90 text-xs font-bold shadow-2xs transition cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Quản lý chủ đề</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Thanh cuộn danh sách chủ đề -->
+    <div id="topicPillsContainer" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1.5">
+      <!-- Render bằng JS -->
+    </div>
+  </section>
+
+  <!-- ================= NỘI DUNG CHÍNH (4 CHẾ ĐỘ HỌC) ================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 pb-16">
+
+    <!-- ==================== CHẾ ĐỘ 1: THẺ GHI NHỚ (FLASHCARDS) ==================== -->
+    <div id="view-flashcards" class="mode-view animate-pop">
+      <div class="max-w-2xl mx-auto">
+        <!-- Thanh điều khiển trên thẻ -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 bg-white px-4 py-3 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-xs sm:text-sm font-semibold text-slate-500">Thẻ:</span>
+            <span id="fcCounter" class="text-xs sm:text-sm font-extrabold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-xl">1 / 11</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+            <!-- Tùy chọn Chỉ từ chưa thuộc -->
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="toggleUnlearnedOnly" onchange="initFlashcards()" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+              <span class="text-xs font-semibold text-slate-700">Chỉ từ chưa thuộc</span>
+            </label>
+
+            <!-- Bật/Tắt phiên âm IPA -->
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="toggleIpa" checked onchange="renderFlashcard()" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 relative"></div>
+              <span class="text-xs font-semibold text-slate-700">Hiện IPA</span>
+            </label>
+
+            <!-- Xáo trộn thẻ (Shuffle) -->
+            <button onclick="shuffleFlashcards()" title="Trộn ngẫu nhiên thứ tự thẻ" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 border border-slate-200/80 transition cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span class="hidden sm:inline">Trộn thẻ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Trạng thái rỗng / Hoàn thành toàn bộ -->
+        <div id="fcEmptyState" class="hidden bg-white rounded-3xl border-2 border-slate-200/90 shadow-lg p-8 text-center animate-pop"></div>
+
+        <!-- Khung Thẻ 3D -->
+        <div id="fcActiveContainer">
+          <div id="flashcardWrapper" class="perspective-1200 w-full h-[385px] sm:h-[415px] cursor-pointer select-none" onclick="flipFlashcard()">
+            <div id="flashcardInner" class="preserve-3d relative w-full h-full">
+
+              <!-- MẶT TRƯỚC THẺ -->
+              <div class="backface-hidden absolute inset-0 bg-white rounded-3xl border-2 border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-8 flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-2">
+                  <span id="fcTopicBadge" class="text-xs font-bold px-3 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">💬 Giao tiếp hàng ngày</span>
+                  <div class="flex items-center gap-2">
+                    <span id="fcPosFrontBadge" class="font-ipa text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">verb</span>
+                    <span id="fcLearnedBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hidden">✓ Đã thuộc</span>
+                  </div>
+                </div>
+
+                <div class="text-center my-auto py-3">
+                  <p id="fcWord" class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-2.5 break-words">accomplish</p>
+                  <p id="fcIpa" class="font-ipa text-base sm:text-lg font-medium text-indigo-600">/əˈkʌmplɪʃ/</p>
+
+                  <!-- Nút phát âm trên mặt trước -->
+                  <div class="mt-6 flex items-center justify-center gap-3" onclick="event.stopPropagation()">
+                    <button id="fcSpeakNormal" onclick="speakCurrentFlashcard(1.0, this)" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-200 transition active:scale-95 cursor-pointer">
+                      <span>🔊 Đọc chuẩn (1.0x)</span>
+                    </button>
+                    <button id="fcSpeakSlow" onclick="speakCurrentFlashcard(0.7, this)" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200/80 font-semibold text-sm transition active:scale-95 cursor-pointer">
+                      <span>🐢 Đọc chậm (0.7x)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Nhấn vào thẻ hoặc phím Space để lật xem nghĩa
+                  </span>
+                </div>
+              </div>
+
+              <!-- MẶT SAU THẺ -->
+              <div class="backface-hidden rotate-y-180 absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-indigo-50/50 rounded-3xl border-2 border-indigo-200 shadow-xl shadow-slate-900/5 p-6 sm:p-8 flex flex-col justify-between">
+                <div class="flex items-center justify-between gap-2">
+                  <span id="fcPosBackBadge" class="font-ipa text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">verb</span>
+                  <span id="fcBackWord" class="text-sm font-bold text-slate-600 truncate max-w-[230px]">accomplish /əˈkʌmplɪʃ/</span>
+                </div>
+
+                <div class="my-auto text-center">
+                  <h2 id="fcMeaning" class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-5 leading-snug">Hoàn thành, đạt được</h2>
+
+                  <!-- Khung câu ví dụ song ngữ Anh - Việt -->
+                  <div class="bg-white rounded-2xl p-4 border border-slate-200/90 text-left shadow-xs" onclick="event.stopPropagation()">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-500 block mb-1">Câu ví dụ</span>
+                        <p id="fcExampleEn" class="text-sm sm:text-base font-bold text-slate-800 mb-1">She worked hard to accomplish all her goals.</p>
+                        <p id="fcExampleVi" class="text-xs sm:text-sm text-slate-500">Cô ấy đã làm việc chăm chỉ để đạt được mọi mục tiêu.</p>
+                      </div>
+                      <button onclick="speakCurrentExample(this)" title="Nghe câu ví dụ" class="shrink-0 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer">
+                        <span>🔊</span>
+                        <span class="hidden sm:inline">Nghe ví dụ</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <span class="text-xs font-medium text-slate-400">Nhấn để quay lại mặt trước</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Nút điều hướng & Đánh giá mức độ thuộc -->
+          <div class="mt-5 grid grid-cols-12 gap-2 sm:gap-3">
+            <!-- Trước -->
+            <button onclick="prevFlashcard()" title="Thẻ trước (Mũi tên Trái)" class="col-span-2 flex items-center justify-center gap-1 py-3.5 px-2 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-bold text-xs shadow-2xs transition active:scale-95 cursor-pointer">
+              <span>←</span>
+              <span class="hidden sm:inline">Trước</span>
+            </button>
+
+            <!-- Chưa thuộc (đưa về cuối hàng đợi ôn tập trong phiên) -->
+            <button onclick="markFlashcard(false)" class="col-span-4 flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-2xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-bold text-xs sm:text-sm shadow-2xs transition active:scale-95 cursor-pointer">
+              <span>❌ Chưa thuộc</span>
+            </button>
+
+            <!-- Đã thuộc -->
+            <button onclick="markFlashcard(true)" class="col-span-4 flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-200 transition active:scale-95 cursor-pointer">
+              <span>✅ Đã thuộc</span>
+            </button>
+
+            <!-- Tiếp -->
+            <button onclick="nextFlashcard()" title="Thẻ tiếp theo (Mũi tên Phải)" class="col-span-2 flex items-center justify-center gap-1 py-3.5 px-2 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-bold text-xs shadow-2xs transition active:scale-95 cursor-pointer">
+              <span class="hidden sm:inline">Tiếp</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <p class="text-center text-xs text-slate-400 mt-3 hidden sm:block">
+            Phím tắt: <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">Space</kbd> Lật thẻ ·
+            <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">A</kbd> Nghe phát âm ·
+            <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">←</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">→</kbd> Chuyển thẻ
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHẾ ĐỘ 2: TRẮC NGHIỆM (QUIZ) ==================== -->
+    <div id="view-quiz" class="mode-view hidden animate-pop">
+      <div class="max-w-2xl mx-auto">
+
+        <!-- Thanh cài đặt kiểu câu hỏi & Chỉ số lượt chơi -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs mb-4 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <label for="quizTypeSelect" class="text-xs font-bold text-slate-500 shrink-0">Dạng câu hỏi:</label>
+              <select id="quizTypeSelect" onchange="startQuizSession()" class="text-xs sm:text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="en-to-vi">Nhìn Anh → Chọn Việt</option>
+                <option value="audio-to-vi">Nghe âm → Chọn Việt</option>
+                <option value="vi-to-en">Nhìn Việt → Chọn Anh</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-xl">
+                Câu <span id="quizCurrentNum">1</span>/<span id="quizTotalNum">10</span>
+              </span>
+              <div class="flex items-center gap-1 bg-amber-50 border border-amber-200/80 px-2.5 py-1.5 rounded-xl">
+                <span class="text-xs">🔥</span>
+                <span class="text-xs font-bold text-amber-800"><span id="quizStreak">0</span></span>
+              </div>
+              <div class="flex items-center gap-1 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-xl">
+                <span class="text-xs font-bold text-indigo-700">Điểm: <span id="quizScore">0</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thanh tiến trình câu hỏi trong lượt -->
+          <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="quizProgressBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 10%"></div>
+          </div>
+        </div>
+
+        <!-- Trạng thái chủ đề trống trong Quiz -->
+        <div id="quizEmptyState" class="hidden bg-white rounded-3xl border-2 border-slate-200/90 shadow-lg p-8 text-center animate-pop"></div>
+
+        <!-- Khung Câu hỏi Trắc nghiệm -->
+        <div id="quizPlayCard" class="bg-white rounded-3xl border-2 border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-8">
+          <div class="flex items-center justify-between mb-4">
+            <span id="quizTopicTag" class="text-xs font-bold px-3 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">Chủ đề</span>
+            <span id="quizPromptLabel" class="text-xs font-semibold text-slate-400">Chọn đáp án đúng nhất (hoặc phím 1–4)</span>
+          </div>
+
+          <!-- Nội dung câu hỏi -->
+          <div id="quizQuestionBox" class="text-center py-6 px-4 rounded-2xl bg-slate-50 border border-slate-200/80 mb-6"></div>
+
+          <!-- 4 Đáp án -->
+          <div id="quizOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+          <!-- Phản hồi & giải thích sau khi chọn đáp án -->
+          <div id="quizFeedbackBox" class="hidden mt-6 p-4 rounded-2xl border animate-pop">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p id="quizFeedbackTitle" class="font-bold text-sm mb-1"></p>
+                <p id="quizFeedbackDetail" class="text-xs text-slate-600 leading-relaxed"></p>
+              </div>
+              <button id="quizNextBtn" onclick="nextQuizStep()" class="shrink-0 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+                Câu tiếp theo →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Màn hình Tổng kết cuối lượt Trắc nghiệm -->
+        <div id="quizSummaryCard" class="hidden bg-white rounded-3xl border-2 border-indigo-200 shadow-xl p-6 sm:p-8 text-center animate-pop">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-3xl">
+            🏆
+          </div>
+          <h3 class="text-2xl font-extrabold text-slate-900 mb-1">Hoàn thành lượt trắc nghiệm!</h3>
+          <p id="quizSummarySubtitle" class="text-sm text-slate-500 mb-6">Bạn đã trả lời đúng 8/10 câu hỏi</p>
+
+          <div class="grid grid-cols-3 gap-3 max-w-md mx-auto mb-6">
+            <div class="bg-indigo-50/80 rounded-2xl p-3 border border-indigo-100">
+              <span class="text-xs font-semibold text-indigo-500 block">Tổng điểm</span>
+              <span id="summaryFinalScore" class="text-xl font-extrabold text-indigo-700">80</span>
+            </div>
+            <div class="bg-emerald-50/80 rounded-2xl p-3 border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-600 block">Chính xác</span>
+              <span id="summaryAccuracy" class="text-xl font-extrabold text-emerald-700">80%</span>
+            </div>
+            <div class="bg-amber-50/80 rounded-2xl p-3 border border-amber-100">
+              <span class="text-xs font-semibold text-amber-600 block">Chuỗi cao nhất</span>
+              <span id="summaryBestStreak" class="text-xl font-extrabold text-amber-700">5</span>
+            </div>
+          </div>
+
+          <!-- Danh sách các từ trả lời sai -->
+          <div id="quizWrongListWrapper" class="hidden text-left mb-6 bg-rose-50/60 border border-rose-200/80 rounded-2xl p-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-rose-700 mb-2.5">Các từ trả lời sai cần ôn lại:</h4>
+            <div id="quizWrongList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button id="retryWrongQuizBtn" onclick="startRetryWrongQuiz()" class="hidden px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md shadow-rose-200 transition cursor-pointer">
+              🔄 Ôn lại câu sai (<span id="wrongCountBtnText">0</span>)
+            </button>
+            <button onclick="startQuizSession()" class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+              Chơi lượt mới →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHẾ ĐỘ 3: NGHE & VIẾT CHÍNH TẢ (DICTATION) ==================== -->
+    <div id="view-dictation" class="mode-view hidden animate-pop">
+      <div class="max-w-2xl mx-auto">
+
+        <!-- Trạng thái chủ đề trống trong Dictation -->
+        <div id="dictEmptyState" class="hidden bg-white rounded-3xl border-2 border-slate-200/90 shadow-lg p-8 text-center animate-pop"></div>
+
+        <div id="dictPlayCard" class="bg-white rounded-3xl border-2 border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-8">
+
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <span id="dictTopicBadge" class="text-xs font-bold px-3 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">Chủ đề</span>
+            <div class="flex items-center gap-2">
+              <span id="dictPosBadge" class="font-ipa text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">adj</span>
+              <button type="button" onclick="toggleDictationMeaning()" id="dictToggleMeaningBtn" class="text-xs font-semibold text-indigo-600 hover:bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 transition cursor-pointer">
+                👁️ Hiện gợi ý nghĩa tiếng Việt
+              </button>
+            </div>
+          </div>
+
+          <!-- Khu vực phát âm & gợi ý nghĩa -->
+          <div class="text-center py-6 px-4 rounded-2xl bg-gradient-to-b from-slate-50 to-indigo-50/40 border border-slate-200/80 mb-6">
+            <p class="text-xs font-bold uppercase tracking-wider text-indigo-500 mb-2">Nghe phát âm và gõ chính xác từ tiếng Anh</p>
+            <h2 id="dictMeaningDisplay" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-5 min-h-[2.25rem]">Tự tin</h2>
+
+            <div class="flex items-center justify-center gap-3">
+              <button onclick="speakDictationWord(1.0, this)" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-200 transition active:scale-95 cursor-pointer">
+                <span>🔊 Đọc chuẩn (1.0x)</span>
+              </button>
+              <button onclick="speakDictationWord(0.7, this)" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 font-semibold text-sm transition active:scale-95 cursor-pointer">
+                <span>🐢 Đọc chậm (0.7x)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hiển thị gợi ý mở dần từng chữ cái -->
+          <div id="dictHintDisplay" class="hidden mb-4 text-center">
+            <span class="font-ipa text-xs sm:text-sm font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl inline-block tracking-wider">
+              Gợi ý: <strong id="dictHintText" class="font-extrabold">c _ n _ _ d _ n t</strong>
+            </span>
+          </div>
+
+          <!-- Ô nhập từ tiếng Anh -->
+          <form onsubmit="handleDictationSubmit(event)" class="space-y-4">
+            <div>
+              <label for="dictInput" class="block text-xs font-bold text-slate-600 mb-1.5">Nhập đáp án tiếng Anh (nhấn Enter để kiểm tra / qua câu tiếp):</label>
+              <input
+                type="text"
+                id="dictInput"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="Gõ từ tiếng Anh tại đây..."
+                class="w-full text-center text-xl sm:text-2xl font-bold text-slate-900 bg-slate-50 border-2 border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-4 py-3.5 focus:outline-none transition"
+              />
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button type="button" id="dictHintBtn" onclick="revealDictationHint()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-sm transition cursor-pointer">
+                <span>💡 Gợi ý chữ cái</span>
+              </button>
+
+              <button type="submit" id="dictCheckBtn" class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+                <span>Kiểm tra chính tả</span>
+              </button>
+
+              <button type="button" onclick="nextDictationWord()" class="inline-flex items-center justify-center gap-1 px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition cursor-pointer">
+                <span>Bỏ qua →</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Kết quả phân tích chi tiết từng ký tự -->
+          <div id="dictResultBox" class="hidden mt-6 p-5 rounded-2xl border animate-pop"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHẾ ĐỘ 4: KHO TỪ VỰNG (VOCABULARY LIBRARY) ==================== -->
+    <div id="view-library" class="mode-view hidden animate-pop">
+
+      <!-- Thanh công cụ tìm kiếm, lọc trạng thái, thêm từ & nhập hàng loạt -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs mb-5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <!-- Ô tìm kiếm tức thì -->
+        <div class="relative flex-1">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input
+            type="text"
+            id="librarySearchInput"
+            oninput="renderLibrary()"
+            placeholder="Tìm từ tiếng Anh, phiên âm IPA, nghĩa tiếng Việt hoặc ví dụ..."
+            class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl focus:outline-none transition"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Lọc trạng thái -->
+          <select id="libraryStatusFilter" onchange="renderLibrary()" class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="learned">✓ Đã thuộc</option>
+            <option value="unlearned">○ Chưa thuộc</option>
+          </select>
+
+          <!-- Nút Thêm hàng loạt -->
+          <button onclick="openBulkImportModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 font-bold text-xs sm:text-sm transition cursor-pointer">
+            <span>📥 Thêm hàng loạt</span>
+          </button>
+
+          <!-- Nút thêm từ vựng mới -->
+          <button onclick="openWordFormModal()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <span>Thêm từ mới</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thông tin số lượng kết quả -->
+      <div class="flex items-center justify-between mb-3 px-1">
+        <p id="libraryCountInfo" class="text-xs font-semibold text-slate-500">Hiển thị 66 từ vựng</p>
+      </div>
+
+      <!-- Lưới thẻ từ vựng -->
+      <div id="libraryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Render bằng JS -->
+      </div>
+
+      <!-- Trạng thái rỗng khi tìm không thấy -->
+      <div id="libraryEmptyState" class="hidden text-center py-14 bg-white rounded-3xl border border-slate-200">
+        <div class="text-4xl mb-3">📭</div>
+        <h3 class="text-base font-bold text-slate-900 mb-1">Không tìm thấy từ vựng phù hợp</h3>
+        <p class="text-xs text-slate-500 mb-4">Bạn có thể thêm từ mới, nhập hàng loạt hoặc đổi bộ lọc tìm kiếm!</p>
+        <div class="flex items-center justify-center gap-2.5">
+          <button onclick="openWordFormModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">+ Thêm từ mới</button>
+          <button onclick="openBulkImportModal()" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition cursor-pointer">📥 Thêm hàng loạt</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL 1: QUẢN LÝ & THÊM / SỬA CHỦ ĐỀ ================= -->
+  <div id="topicManagerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-pop max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">🗂️</span>
+          <span>Quản lý & Thêm chủ đề mới</span>
+        </h3>
+        <button onclick="closeTopicManagerModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Form Tạo / Sửa chủ đề -->
+      <form id="topicForm" onsubmit="handleTopicFormSubmit(event)" class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200/90 mb-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <span id="topicFormModeLabel" class="text-xs font-extrabold uppercase tracking-wider text-indigo-600">✨ Tạo chủ đề mới</span>
+          <button type="button" id="cancelTopicEditBtn" onclick="resetTopicForm()" class="hidden text-xs font-semibold text-slate-500 hover:text-rose-600 cursor-pointer">Hủy chỉnh sửa</button>
+        </div>
+
+        <input type="hidden" id="editingTopicId" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-8">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tên chủ đề *</label>
+            <input type="text" id="topicNameInput" required maxlength="45" placeholder="VD: IELTS Academic, Công nghệ AI, Phỏng vấn..." class="w-full text-sm font-semibold px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-indigo-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-4">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Biểu tượng Emoji *</label>
+            <input type="text" id="topicEmojiInput" required maxlength="4" value="📚" class="w-full text-center text-lg px-3 py-2 rounded-xl bg-white border border-slate-200 focus:border-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Bảng chọn nhanh 24 biểu tượng Emoji -->
+        <div>
+          <span class="block text-[11px] font-semibold text-slate-500 mb-1.5">Chọn nhanh biểu tượng (24 Emoji):</span>
+          <div id="topicEmojiPicker" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Bảng chọn 8 tông màu nhãn -->
+        <div>
+          <span class="block text-[11px] font-semibold text-slate-500 mb-1.5">Tông màu nhãn chủ đề:</span>
+          <div id="topicColorPicker" class="flex flex-wrap items-center gap-2"></div>
+        </div>
+
+        <!-- Live Preview & Nút lưu -->
+        <div class="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500">Xem trước:</span>
+            <span id="topicPreviewBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span>📚</span>
+              <span>Chủ đề mới</span>
+            </span>
+          </div>
+          <button type="submit" id="topicSaveBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+            + Tạo chủ đề
+          </button>
+        </div>
+      </form>
+
+      <!-- Danh sách chủ đề tự tạo & mặc định -->
+      <div class="space-y-4">
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">
+            Chủ đề bạn đã tạo (<span id="customTopicsCountLabel">0</span>)
+          </h4>
+          <div id="customTopicsList" class="space-y-2"></div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Chủ đề hệ thống mặc định (6)</h4>
+          <div id="defaultTopicsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: THÊM / SỬA TỪ VỰNG (CÓ TẠO NHANH CHỦ ĐỀ) ================= -->
+  <div id="wordFormModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-pop max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="wordModalTitle" class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">✨</span>
+          <span>Thêm từ vựng tiếng Anh mới</span>
+        </h3>
+        <button onclick="closeWordFormModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="wordForm" onsubmit="handleWordFormSubmit(event)" class="space-y-3.5">
+        <input type="hidden" id="editingWordId" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Từ / Cụm từ tiếng Anh *</label>
+            <input type="text" id="wordEnInput" required placeholder="VD: breakthrough" class="w-full text-sm font-bold px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Phiên âm IPA *</label>
+            <input type="text" id="wordIpaInput" required placeholder="VD: /ˈbreɪkθruː/" class="w-full font-ipa text-sm px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nghĩa tiếng Việt *</label>
+            <input type="text" id="wordMeaningInput" required placeholder="VD: Bước đột phá" class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Loại từ *</label>
+            <select id="wordPosInput" class="w-full font-ipa text-sm font-semibold px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+              <option value="noun">noun (Danh từ)</option>
+              <option value="verb">verb (Động từ)</option>
+              <option value="adj">adj (Tính từ)</option>
+              <option value="adv">adv (Trạng từ)</option>
+              <option value="phrasal verb">phrasal verb (Cụm động từ)</option>
+              <option value="idiom">idiom (Thành ngữ)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Chọn chủ đề + Nút Tạo nhanh chủ đề mới -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="wordTopicSelect" class="block text-xs font-bold text-slate-700">Chủ đề *</label>
+            <button type="button" onclick="toggleQuickTopicBox('word')" class="text-xs font-bold text-indigo-600 hover:text-emerald-600 transition cursor-pointer">
+              + Tạo nhanh chủ đề mới
+            </button>
+          </div>
+          <select id="wordTopicSelect" class="w-full text-sm font-semibold px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none"></select>
+
+          <!-- Form thu gọn Tạo nhanh chủ đề mới -->
+          <div id="quickTopicBox-word" class="hidden mt-2.5 p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-2.5 animate-pop">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-indigo-800">⚡ Tạo nhanh chủ đề mới</span>
+              <button type="button" onclick="toggleQuickTopicBox('word', false)" class="text-xs text-slate-500 hover:text-slate-800 cursor-pointer">Đóng</button>
+            </div>
+            <div class="grid grid-cols-12 gap-2">
+              <input type="text" id="quickTopicName-word" placeholder="Tên chủ đề mới..." class="col-span-7 text-xs font-semibold px-3 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500">
+              <input type="text" id="quickTopicEmoji-word" value="🎯" maxlength="4" class="col-span-2 text-center text-sm px-2 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none">
+              <select id="quickTopicColor-word" class="col-span-3 text-xs font-semibold px-2 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none">
+                <option value="indigo">Indigo</option>
+                <option value="emerald">Emerald</option>
+                <option value="rose">Rose</option>
+                <option value="amber">Amber</option>
+                <option value="sky">Sky</option>
+                <option value="violet">Violet</option>
+                <option value="teal">Teal</option>
+                <option value="orange">Orange</option>
+              </select>
+            </div>
+            <button type="button" onclick="submitQuickTopic('word')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition cursor-pointer">
+              ✓ Tạo và chọn chủ đề này ngay
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Câu ví dụ tiếng Anh (tùy chọn)</label>
+          <input type="text" id="wordExampleEnInput" placeholder="VD: Scientists have made a major breakthrough." class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Dịch nghĩa ví dụ tiếng Việt (tùy chọn)</label>
+          <input type="text" id="wordExampleViInput" placeholder="VD: Các nhà khoa học đã tạo ra một bước đột phá lớn." class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeWordFormModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Hủy</button>
+          <button type="submit" id="wordFormSubmitBtn" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition cursor-pointer">Lưu từ vựng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: THÊM TỪ HÀNG LOẠT (BULK IMPORT) ================= -->
+  <div id="bulkImportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-pop max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">📥</span>
+          <span>Thêm từ vựng hàng loạt</span>
+        </h3>
+        <button onclick="closeBulkImportModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="handleBulkImportSubmit(event)" class="space-y-4">
+        <!-- Chọn chủ đề đích + Tạo nhanh chủ đề -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="bulkTopicSelect" class="block text-xs font-bold text-slate-700">Nhập vào chủ đề *</label>
+            <button type="button" onclick="toggleQuickTopicBox('bulk')" class="text-xs font-bold text-indigo-600 hover:text-emerald-600 transition cursor-pointer">
+              + Tạo nhanh chủ đề mới
+            </button>
+          </div>
+          <select id="bulkTopicSelect" class="w-full text-sm font-semibold px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none"></select>
+
+          <!-- Form thu gọn Tạo nhanh chủ đề -->
+          <div id="quickTopicBox-bulk" class="hidden mt-2.5 p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-2.5 animate-pop">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-indigo-800">⚡ Tạo nhanh chủ đề mới</span>
+              <button type="button" onclick="toggleQuickTopicBox('bulk', false)" class="text-xs text-slate-500 hover:text-slate-800 cursor-pointer">Đóng</button>
+            </div>
+            <div class="grid grid-cols-12 gap-2">
+              <input type="text" id="quickTopicName-bulk" placeholder="Tên chủ đề mới..." class="col-span-7 text-xs font-semibold px-3 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:border-indigo-500">
+              <input type="text" id="quickTopicEmoji-bulk" value="💻" maxlength="4" class="col-span-2 text-center text-sm px-2 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none">
+              <select id="quickTopicColor-bulk" class="col-span-3 text-xs font-semibold px-2 py-2 rounded-xl bg-white border border-indigo-200 focus:outline-none">
+                <option value="indigo">Indigo</option>
+                <option value="emerald">Emerald</option>
+                <option value="rose">Rose</option>
+                <option value="amber">Amber</option>
+                <option value="sky">Sky</option>
+                <option value="violet">Violet</option>
+                <option value="teal">Teal</option>
+                <option value="orange">Orange</option>
+              </select>
+            </div>
+            <button type="button" onclick="submitQuickTopic('bulk')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition cursor-pointer">
+              ✓ Tạo và chọn chủ đề này ngay
+            </button>
+          </div>
+        </div>
+
+        <!-- Hướng dẫn định dạng & Nút chèn 3 dòng mẫu -->
+        <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 text-xs text-slate-600 space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-slate-800">Định dạng mỗi dòng (ngăn cách bởi dấu <code class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-indigo-600 font-bold">|</code>):</span>
+            <button type="button" onclick="fillBulkSample()" class="text-indigo-600 hover:underline font-bold shrink-0 cursor-pointer">
+              Chèn 3 dòng mẫu
+            </button>
+          </div>
+          <p class="font-ipa text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-200/70 overflow-x-auto">
+            Tiếng Anh | Phiên âm IPA | Nghĩa tiếng Việt | Loại từ | Câu ví dụ | Nghĩa ví dụ
+          </p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="bulkTextarea" class="block text-xs font-bold text-slate-700">Danh sách từ vựng *</label>
+            <span id="bulkParsedCount" class="text-xs font-bold text-emerald-600">0 từ hợp lệ</span>
+          </div>
+          <textarea
+            id="bulkTextarea"
+            rows="6"
+            oninput="updateBulkPreviewCount()"
+            placeholder="innovative | /ˈɪnəveɪtɪv/ | Đổi mới, sáng tạo | adj | Their team proposed an innovative solution. | Nhóm của họ đã đề xuất một giải pháp sáng tạo.&#10;consensus | /kənˈsensəs/ | Sự đồng thuận | noun | We finally reached a consensus after the meeting. | Cuối cùng chúng tôi đã đạt được sự đồng thuận sau cuộc họp."
+            class="w-full text-xs sm:text-sm p-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:outline-none leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div class="pt-1 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeBulkImportModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Hủy</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition cursor-pointer">
+            Nhập danh sách từ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4: SAO LƯU / KHÔI PHỤC JSON & ĐẶT LẠI DỮ LIỆU ================= -->
+  <div id="jsonModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-pop max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">💾</span>
+          <span>Sao lưu & Khôi phục dữ liệu JSON</span>
+        </h3>
+        <button onclick="closeJsonModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-5">
+        <!-- Phần 1: Xuất / Sao chép bản sao lưu -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">1. Xuất bản sao lưu hiện tại</h4>
+              <p class="text-xs text-slate-500">Bao gồm toàn bộ chủ đề tự tạo, từ vựng cá nhân và tiến độ đã thuộc.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="copyBackupJsonToClipboard()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold transition cursor-pointer">
+                <span>📋 Sao chép JSON</span>
+              </button>
+              <button type="button" onclick="downloadBackupJsonFile()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                <span>⬇️ Tải file .json</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="jsonExportPreview" readonly rows="4" class="w-full font-ipa text-[11px] text-slate-600 bg-white border border-slate-200 rounded-xl p-3 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Phần 2: Khôi phục từ file .json hoặc dán chuỗi JSON -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-700">2. Khôi phục từ file hoặc chuỗi JSON</h4>
+              <p class="text-xs text-slate-500">Tải lên file <code class="font-ipa">.json</code> hoặc dán chuỗi JSON vào khung dưới để gộp dữ liệu.</p>
+            </div>
+            <div>
+              <button type="button" onclick="document.getElementById('jsonFileUploadInput').click()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                <span>📂 Tải lên file .json</span>
+              </button>
+              <input type="file" id="jsonFileUploadInput" accept=".json,application/json" class="hidden" onchange="handleJsonFileUpload(event)">
+            </div>
+          </div>
+          <textarea id="jsonImportTextarea" rows="4" placeholder='Dán chuỗi JSON sao lưu tại đây (ví dụ: {"app":"AnhNguStudio", ...})' class="w-full font-ipa text-[11px] text-slate-800 bg-white border border-slate-200 focus:border-emerald-500 rounded-xl p-3 focus:outline-none"></textarea>
+          <div class="flex justify-end">
+            <button type="button" onclick="restoreFromPastedJson()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer">
+              ✓ Khôi phục từ văn bản JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- Phần 3: Đặt lại dữ liệu mặc định (có xác nhận 2 bước, không dùng confirm()) -->
+        <div class="pt-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-bold text-rose-700">Đặt lại dữ liệu mặc định</p>
+            <p class="text-[11px] text-slate-500">Xóa tiến độ đã thuộc và khôi phục kho 66 từ mặc định ban đầu.</p>
+          </div>
+          <div id="resetDefaultStep1">
+            <button type="button" onclick="toggleResetConfirm(true)" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer">
+              🔄 Đặt lại mặc định
+            </button>
+          </div>
+          <div id="resetDefaultStep2" class="hidden flex items-center gap-2">
+            <button type="button" onclick="toggleResetConfirm(false)" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold cursor-pointer">Hủy</button>
+            <button type="button" onclick="executeFullResetToDefault()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs cursor-pointer">Xác nhận đặt lại</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= THÔNG BÁO TOAST NHẸ NHÀNG ================= -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // 1. BẢNG 8 TÔNG MÀU NHÃN CHO CHỦ ĐỀ
+    const TOPIC_COLORS = {
+      indigo:  { label: 'Indigo',  dot: 'bg-indigo-500',  badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',    active: 'bg-indigo-600 text-white border-indigo-600 shadow-indigo-200' },
+      emerald: { label: 'Emerald', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', active: 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-200' },
+      rose:    { label: 'Rose',    dot: 'bg-rose-500',    badge: 'bg-rose-50 text-rose-700 border-rose-200',          active: 'bg-rose-600 text-white border-rose-600 shadow-rose-200' },
+      amber:   { label: 'Amber',   dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-800 border-amber-200',       active: 'bg-amber-500 text-white border-amber-500 shadow-amber-200' },
+      sky:     { label: 'Sky',     dot: 'bg-sky-500',     badge: 'bg-sky-50 text-sky-700 border-sky-200',             active: 'bg-sky-600 text-white border-sky-600 shadow-sky-200' },
+      violet:  { label: 'Violet',  dot: 'bg-violet-500',  badge: 'bg-violet-50 text-violet-700 border-violet-200',    active: 'bg-violet-600 text-white border-violet-600 shadow-violet-200' },
+      teal:    { label: 'Teal',    dot: 'bg-teal-500',    badge: 'bg-teal-50 text-teal-700 border-teal-200',          active: 'bg-teal-600 text-white border-teal-600 shadow-teal-200' },
+      orange:  { label: 'Orange',  dot: 'bg-orange-500',  badge: 'bg-orange-50 text-orange-700 border-orange-200',    active: 'bg-orange-500 text-white border-orange-500 shadow-orange-200' }
+    };
+
+    // Bảng chọn nhanh 24 biểu tượng Emoji chuẩn theo yêu cầu
+    const EMOJI_PRESETS = [
+      '📚', '🎯', '💻', '🏥', '🎬', '🎵', '🏋️', '🌍',
+      '💰', '🏠', '🎨', '📱', '🧠', '⚖️', '🌱', '🐾',
+      '👗', '🚗', '🎓', '🔬', '⚽', '☕', '🛍️', '✨'
+    ];
+
+    // 2. DANH SÁCH 6 CHỦ ĐỀ MẶC ĐỊNH
+    const DEFAULT_TOPICS = [
+      { id: '1', name: 'Giao tiếp hàng ngày',      icon: '💬', color: 'indigo',  isCustom: false },
+      { id: '2', name: 'Công việc & Văn phòng',   icon: '💼', color: 'emerald', isCustom: false },
+      { id: '3', name: 'Du lịch & Di chuyển',     icon: '✈️', color: 'sky',     isCustom: false },
+      { id: '4', name: 'Ẩm thực & Mua sắm',       icon: '🍽️', color: 'amber',   isCustom: false },
+      { id: '5', name: 'Cảm xúc & Tính cách',     icon: '💡', color: 'rose',    isCustom: false },
+      { id: '6', name: 'Cụm động từ & Thành ngữ', icon: '🚀', color: 'violet',  isCustom: false }
+    ];
+
+    // 3. KHO DỮ LIỆU MẶC ĐỊNH CHUẨN XÁC (66 TỪ VỰNG - 11 TỪ / CHỦ ĐỀ)
+    const DEFAULT_VOCABULARY = [
+      // --- CHỦ ĐỀ 1: GIAO TIẾP HÀNG NGÀY (11 từ) ---
+      { id: 'e1',  topic: '1', word: 'accomplish',     ipa: '/əˈkʌmplɪʃ/',      pos: 'verb',         meaning: 'Hoàn thành, đạt được',                 exampleEn: 'She worked hard to accomplish all her goals this year.',       exampleVi: 'Cô ấy đã làm việc chăm chỉ để đạt được mọi mục tiêu trong năm nay.' },
+      { id: 'e2',  topic: '1', word: 'appreciate',     ipa: '/əˈpriːʃieɪt/',    pos: 'verb',         meaning: 'Trân trọng, cảm kích',                 exampleEn: 'I really appreciate your help with this project.',            exampleVi: 'Tôi thực sự cảm kích sự giúp đỡ của bạn trong dự án này.' },
+      { id: 'e3',  topic: '1', word: 'convenient',     ipa: '/kənˈviːniənt/',   pos: 'adj',          meaning: 'Thuận tiện, tiện lợi',                 exampleEn: 'Online banking is very convenient for busy people.',          exampleVi: 'Ngân hàng trực tuyến rất tiện lợi cho những người bận rộn.' },
+      { id: 'e4',  topic: '1', word: 'essential',      ipa: '/ɪˈsenʃl/',        pos: 'adj',          meaning: 'Thiết yếu, cực kỳ quan trọng',         exampleEn: 'Drinking enough water is essential for good health.',         exampleVi: 'Uống đủ nước là điều thiết yếu để có sức khỏe tốt.' },
+      { id: 'e5',  topic: '1', word: 'frequently',     ipa: '/ˈfriːkwəntli/',   pos: 'adv',          meaning: 'Thường xuyên',                           exampleEn: 'We frequently meet at that coffee shop on weekends.',         exampleVi: 'Chúng tôi thường xuyên gặp nhau ở quán cà phê đó vào cuối tuần.' },
+      { id: 'e6',  topic: '1', word: 'hesitate',       ipa: '/ˈhezɪteɪt/',     pos: 'verb',         meaning: 'Do dự, ngần ngại',                     exampleEn: 'Please do not hesitate to contact me if you need anything.',  exampleVi: 'Xin đừng ngần ngại liên hệ với tôi nếu bạn cần bất cứ điều gì.' },
+      { id: 'e7',  topic: '1', word: 'maintain',       ipa: '/meɪnˈteɪn/',     pos: 'verb',         meaning: 'Duy trì, giữ gìn',                     exampleEn: 'It is important to maintain a healthy work-life balance.',    exampleVi: 'Việc duy trì sự cân bằng lành mạnh giữa công việc và cuộc sống rất quan trọng.' },
+      { id: 'e8',  topic: '1', word: 'obvious',        ipa: '/ˈɒbviəs/',       pos: 'adj',          meaning: 'Rõ ràng, hiển nhiên',                  exampleEn: 'It was obvious that everyone enjoyed the performance.',        exampleVi: 'Rõ ràng là mọi người đều rất thích buổi biểu diễn.' },
+      { id: 'e9',  topic: '1', word: 'postpone',       ipa: '/pəˈspəʊn/',      pos: 'verb',         meaning: 'Trì hoãn, dời lại',                    exampleEn: 'They decided to postpone the picnic due to heavy rain.',      exampleVi: 'Họ quyết định hoãn buổi dã ngoại vì mưa lớn.' },
+      { id: 'e10', topic: '1', word: 'reliable',       ipa: '/rɪˈlaɪəbl/',     pos: 'adj',          meaning: 'Đáng tin cậy',                         exampleEn: 'Nam is a reliable friend who always keeps his promises.',     exampleVi: 'Nam là một người bạn đáng tin cậy và luôn giữ lời hứa.' },
+      { id: 'e11', topic: '1', word: 'temporary',      ipa: '/ˈtemprəri/',     pos: 'adj',          meaning: 'Tạm thời, nhất thời',                  exampleEn: 'This apartment is just a temporary place until our house is ready.', exampleVi: 'Căn hộ này chỉ là chỗ ở tạm thời cho đến khi nhà chúng tôi xong.' },
+
+      // --- CHỦ ĐỀ 2: CÔNG VIỆC & VĂN PHÒNG (11 từ) ---
+      { id: 'e12', topic: '2', word: 'agenda',         ipa: '/əˈdʒendə/',      pos: 'noun',         meaning: 'Chương trình nghị sự, lịch trình họp', exampleEn: 'What is the first item on today’s meeting agenda?',           exampleVi: 'Mục đầu tiên trong chương trình cuộc họp hôm nay là gì?' },
+      { id: 'e13', topic: '2', word: 'collaborate',    ipa: '/kəˈlæbəreɪt/',   pos: 'verb',         meaning: 'Hợp tác, cộng tác',                    exampleEn: 'Our design and marketing teams collaborate closely on every launch.', exampleVi: 'Đội thiết kế và tiếp thị của chúng tôi hợp tác chặt chẽ trong mỗi lần ra mắt.' },
+      { id: 'e14', topic: '2', word: 'deadline',       ipa: '/ˈdedlaɪn/',      pos: 'noun',         meaning: 'Hạn chót',                               exampleEn: 'We must submit the final report before Friday’s deadline.',   exampleVi: 'Chúng ta phải nộp báo cáo cuối cùng trước hạn chót thứ Sáu.' },
+      { id: 'e15', topic: '2', word: 'delegate',       ipa: '/ˈdelɪɡeɪt/',     pos: 'verb',         meaning: 'Ủy quyền, giao phó công việc',         exampleEn: 'A good manager knows how to delegate tasks effectively.',     exampleVi: 'Một người quản lý giỏi biết cách phân công công việc hiệu quả.' },
+      { id: 'e16', topic: '2', word: 'efficient',      ipa: '/ɪˈfɪʃnt/',       pos: 'adj',          meaning: 'Hiệu quả, năng suất cao',              exampleEn: 'The new software makes data entry much faster and more efficient.', exampleVi: 'Phần mềm mới giúp việc nhập dữ liệu nhanh và hiệu quả hơn nhiều.' },
+      { id: 'e17', topic: '2', word: 'negotiate',      ipa: '/nɪˈɡəʊʃieɪt/',   pos: 'verb',         meaning: 'Đàm phán, thương lượng',               exampleEn: 'Both companies are trying to negotiate a fair contract.',     exampleVi: 'Cả hai công ty đang cố gắng đàm phán một bản hợp đồng công bằng.' },
+      { id: 'e18', topic: '2', word: 'objective',      ipa: '/əbˈdʒektɪv/',    pos: 'noun',         meaning: 'Mục tiêu',                               exampleEn: 'Our main objective this quarter is to improve customer satisfaction.', exampleVi: 'Mục tiêu chính của chúng tôi trong quý này là nâng cao sự hài lòng của khách hàng.' },
+      { id: 'e19', topic: '2', word: 'priority',       ipa: '/praɪˈɒrəti/',    pos: 'noun',         meaning: 'Sự ưu tiên',                             exampleEn: 'Safety is always our top priority in the workplace.',         exampleVi: 'An toàn luôn là ưu tiên hàng đầu của chúng tôi tại nơi làm việc.' },
+      { id: 'e20', topic: '2', word: 'productive',     ipa: '/prəˈdʌktɪv/',    pos: 'adj',          meaning: 'Năng suất, hiệu quả',                  exampleEn: 'We had a very productive brainstorming session this morning.', exampleVi: 'Sáng nay chúng tôi đã có một buổi thảo luận ý tưởng rất năng suất.' },
+      { id: 'e21', topic: '2', word: 'schedule',       ipa: '/ˈʃedjuːl/',      pos: 'noun',         meaning: 'Lịch trình, thời gian biểu',           exampleEn: 'Let me check my schedule to see if I am free tomorrow afternoon.', exampleVi: 'Để tôi kiểm tra lịch trình xem chiều mai tôi có rảnh không.' },
+      { id: 'e22', topic: '2', word: 'strategy',       ipa: '/ˈstrætədʒi/',    pos: 'noun',         meaning: 'Chiến lược',                             exampleEn: 'The company announced a new strategy for international expansion.', exampleVi: 'Công ty đã công bố một chiến lược mới để mở rộng ra quốc tế.' },
+
+      // --- CHỦ ĐỀ 3: DU LỊCH & DI CHUYỂN (11 từ) ---
+      { id: 'e23', topic: '3', word: 'accommodation',  ipa: '/əˌkɒməˈdeɪʃn/',  pos: 'noun',         meaning: 'Chỗ ở, nơi lưu trú',                   exampleEn: 'Hotel accommodation is included in the tour package.',        exampleVi: 'Chỗ ở khách sạn đã được bao gồm trong gói tour du lịch.' },
+      { id: 'e24', topic: '3', word: 'boarding pass',  ipa: '/ˈbɔːdɪŋ pɑːs/',  pos: 'noun',         meaning: 'Thẻ lên máy bay',                        exampleEn: 'Please have your passport and boarding pass ready at the gate.', exampleVi: 'Vui lòng chuẩn bị sẵn hộ chiếu và thẻ lên máy bay tại cửa khởi hành.' },
+      { id: 'e25', topic: '3', word: 'departure',      ipa: '/dɪˈpɑːtʃə(r)/',  pos: 'noun',         meaning: 'Sự khởi hành',                           exampleEn: 'Passengers should arrive two hours before their scheduled departure.', exampleVi: 'Hành khách nên đến trước giờ khởi hành dự kiến hai tiếng.' },
+      { id: 'e26', topic: '3', word: 'destination',    ipa: '/ˌdestɪˈneɪʃn/',  pos: 'noun',         meaning: 'Điểm đến',                               exampleEn: 'Da Nang is a popular coastal destination for summer vacations.', exampleVi: 'Đà Nẵng là một điểm đến ven biển nổi tiếng cho kỳ nghỉ hè.' },
+      { id: 'e27', topic: '3', word: 'excursion',      ipa: '/ɪkˈskɜːʃn/',     pos: 'noun',         meaning: 'Chuyến tham quan ngắn ngày',            exampleEn: 'We went on a full-day excursion to the ancient town.',        exampleVi: 'Chúng tôi đã có một chuyến tham quan trọn ngày đến khu phố cổ.' },
+      { id: 'e28', topic: '3', word: 'itinerary',      ipa: '/aɪˈtɪnərəri/',   pos: 'noun',         meaning: 'Lịch trình chi tiết chuyến đi',        exampleEn: 'Our travel agent sent us a detailed itinerary for the trip.', exampleVi: 'Đại lý du lịch đã gửi cho chúng tôi lịch trình chi tiết cho chuyến đi.' },
+      { id: 'e29', topic: '3', word: 'landmark',       ipa: '/ˈlændmɑːk/',     pos: 'noun',         meaning: 'Địa danh nổi tiếng, công trình biểu tượng', exampleEn: 'The Golden Bridge has become an iconic landmark in Vietnam.', exampleVi: 'Cầu Vàng đã trở thành một địa danh biểu tượng tại Việt Nam.' },
+      { id: 'e30', topic: '3', word: 'luggage',        ipa: '/ˈlʌɡɪdʒ/',       pos: 'noun',         meaning: 'Hành lý',                                exampleEn: 'Never leave your luggage unattended at the airport.',         exampleVi: 'Không bao giờ để hành lý của bạn không có người trông coi ở sân bay.' },
+      { id: 'e31', topic: '3', word: 'reservation',    ipa: '/ˌrezəˈveɪʃn/',   pos: 'noun',         meaning: 'Sự đặt chỗ trước',                       exampleEn: 'I made a reservation for two nights at a beachfront resort.',  exampleVi: 'Tôi đã đặt trước hai đêm tại một khu nghỉ dưỡng ven biển.' },
+      { id: 'e32', topic: '3', word: 'souvenir',       ipa: '/ˌsuːvəˈnɪə(r)/', pos: 'noun',         meaning: 'Quà lưu niệm',                           exampleEn: 'I bought a handcrafted lantern as a souvenir from Hoi An.',   exampleVi: 'Tôi đã mua một chiếc đèn lồng thủ công làm quà lưu niệm từ Hội An.' },
+      { id: 'e33', topic: '3', word: 'terminal',       ipa: '/ˈtɜːmɪnl/',      pos: 'noun',         meaning: 'Nhà ga (sân bay / bến xe)',             exampleEn: 'International flights depart from Terminal 2.',               exampleVi: 'Các chuyến bay quốc tế khởi hành từ Nhà ga số 2.' },
+
+      // --- CHỦ ĐỀ 4: ẨM THỰC & MUA SẮM (11 từ) ---
+      { id: 'e34', topic: '4', word: 'affordable',     ipa: '/əˈfɔːdəbl/',     pos: 'adj',          meaning: 'Giá cả phải chăng',                      exampleEn: 'This local restaurant serves delicious food at affordable prices.', exampleVi: 'Nhà hàng địa phương này phục vụ đồ ăn ngon với mức giá phải chăng.' },
+      { id: 'e35', topic: '4', word: 'appetizer',      ipa: '/ˈæpɪtaɪzə(r)/', pos: 'noun',         meaning: 'Món khai vị',                            exampleEn: 'We ordered crispy spring rolls as an appetizer.',             exampleVi: 'Chúng tôi đã gọi món chả giò giòn làm món khai vị.' },
+      { id: 'e36', topic: '4', word: 'bargain',        ipa: '/ˈbɑːɡən/',       pos: 'noun',         meaning: 'Món hời (mua được giá rẻ)',            exampleEn: 'At half price, this winter jacket was a real bargain!',       exampleVi: 'Với mức giảm một nửa giá, chiếc áo khoác mùa đông này thực sự là một món hời!' },
+      { id: 'e37', topic: '4', word: 'beverage',       ipa: '/ˈbevərɪdʒ/',     pos: 'noun',         meaning: 'Đồ uống, thức uống',                     exampleEn: 'Fresh coconut water is my favorite refreshing beverage.',      exampleVi: 'Nước dừa tươi là thức uống giải khát yêu thích của tôi.' },
+      { id: 'e38', topic: '4', word: 'cuisine',        ipa: '/kwɪˈziːn/',      pos: 'noun',         meaning: 'Ẩm thực',                                exampleEn: 'Vietnamese cuisine is famous worldwide for its fresh herbs.', exampleVi: 'Ẩm thực Việt Nam nổi tiếng khắp thế giới nhờ rau thơm tươi ngon.' },
+      { id: 'e39', topic: '4', word: 'delicacy',       ipa: '/ˈdelɪkəsi/',     pos: 'noun',         meaning: 'Món đặc sản, cao lương mỹ vị',           exampleEn: 'You should definitely try this regional delicacy when visiting.', exampleVi: 'Bạn nhất định nên thử món đặc sản vùng miền này khi đến thăm.' },
+      { id: 'e40', topic: '4', word: 'ingredient',     ipa: '/ɪnˈɡriːdiənt/',  pos: 'noun',         meaning: 'Nguyên liệu, thành phần',                exampleEn: 'Fresh ingredients are the secret to a great homemade meal.',  exampleVi: 'Nguyên liệu tươi ngon là bí quyết cho một bữa ăn tự nấu tuyệt vời.' },
+      { id: 'e41', topic: '4', word: 'nutritious',     ipa: '/njuˈtrɪʃəs/',    pos: 'adj',          meaning: 'Giàu dinh dưỡng, bổ dưỡng',             exampleEn: 'Oatmeal with fruit makes a quick and nutritious breakfast.',  exampleVi: 'Yến mạch với trái cây tạo nên bữa sáng nhanh gọn và bổ dưỡng.' },
+      { id: 'e42', topic: '4', word: 'receipt',        ipa: '/rɪˈsiːt/',       pos: 'noun',         meaning: 'Hóa đơn, biên lai',                      exampleEn: 'Keep your receipt in case you want to exchange the item later.', exampleVi: 'Hãy giữ lại hóa đơn phòng trường hợp bạn muốn đổi món đồ sau này.' },
+      { id: 'e43', topic: '4', word: 'refund',         ipa: '/ˈriːfʌnd/',      pos: 'noun',         meaning: 'Tiền hoàn lại, sự hoàn tiền',            exampleEn: 'The store offered a full refund because the item was damaged.', exampleVi: 'Cửa hàng đã hoàn lại toàn bộ tiền vì sản phẩm bị hư hỏng.' },
+      { id: 'e44', topic: '4', word: 'warranty',       ipa: '/ˈwɒrənti/',      pos: 'noun',         meaning: 'Giấy bảo hành, chế độ bảo hành',         exampleEn: 'This laptop comes with a two-year manufacturer warranty.',    exampleVi: 'Chiếc máy tính xách tay này đi kèm chế độ bảo hành hai năm.' },
+
+      // --- CHỦ ĐỀ 5: CẢM XÚC & TÍNH CÁCH (11 từ) ---
+      { id: 'e45', topic: '5', word: 'ambitious',      ipa: '/æmˈbɪʃəs/',      pos: 'adj',          meaning: 'Tham vọng, giàu hoài bão',               exampleEn: 'She is an ambitious young entrepreneur with big plans.',      exampleVi: 'Cô ấy là một doanh nhân trẻ giàu hoài bão với những kế hoạch lớn.' },
+      { id: 'e46', topic: '5', word: 'anxious',        ipa: '/ˈæŋkʃəs/',       pos: 'adj',          meaning: 'Lo âu, bồn chồn',                        exampleEn: 'He felt a little anxious before his first job interview.',    exampleVi: 'Anh ấy cảm thấy hơi lo lắng trước buổi phỏng vấn xin việc đầu tiên.' },
+      { id: 'e47', topic: '5', word: 'compassionate',  ipa: '/kəmˈpæʃənət/',   pos: 'adj',          meaning: 'Giàu lòng trắc ẩn, nhân hậu',            exampleEn: 'She is a deeply compassionate doctor who cares for every patient.', exampleVi: 'Cô ấy là một bác sĩ giàu lòng nhân hậu, quan tâm đến từng bệnh nhân.' },
+      { id: 'e48', topic: '5', word: 'confident',      ipa: '/ˈkɒnfɪdənt/',    pos: 'adj',          meaning: 'Tự tin',                                 exampleEn: 'Practicing every day will make you more confident when speaking.', exampleVi: 'Luyện tập mỗi ngày sẽ giúp bạn tự tin hơn khi giao tiếp.' },
+      { id: 'e49', topic: '5', word: 'diligent',       ipa: '/ˈdɪlɪdʒənt/',    pos: 'adj',          meaning: 'Siêng năng, cần cù',                     exampleEn: 'Diligent students review their notes regularly after class.', exampleVi: 'Những học sinh siêng năng thường xuyên xem lại ghi chép sau giờ học.' },
+      { id: 'e50', topic: '5', word: 'enthusiastic',   ipa: '/ɪnˌθjuːziˈæstɪk/',pos: 'adj',         meaning: 'Nhiệt tình, hào hứng',                   exampleEn: 'The audience was very enthusiastic about the new product demo.', exampleVi: 'Khán giả rất hào hứng với phần giới thiệu sản phẩm mới.' },
+      { id: 'e51', topic: '5', word: 'frustrated',     ipa: '/frʌˈstreɪtɪd/',  pos: 'adj',          meaning: 'Nản lòng, bực bội',                      exampleEn: 'Do not get frustrated when you make mistakes; they help you learn.', exampleVi: 'Đừng nản lòng khi mắc lỗi; chúng giúp bạn học hỏi tiến bộ hơn.' },
+      { id: 'e52', topic: '5', word: 'generous',       ipa: '/ˈdʒenərəs/',     pos: 'adj',          meaning: 'Hào phóng, rộng lượng',                  exampleEn: 'It was very generous of them to donate books to the rural school.', exampleVi: 'Họ thật hào phóng khi quyên góp sách cho ngôi trường ở vùng nông thôn.' },
+      { id: 'e53', topic: '5', word: 'optimistic',     ipa: '/ˌɒptɪˈmɪstɪk/',  pos: 'adj',          meaning: 'Lạc quan',                               exampleEn: 'Despite the challenges, we remain optimistic about the future.', exampleVi: 'Bất chấp những thử thách, chúng tôi vẫn lạc quan về tương lai.' },
+      { id: 'e54', topic: '5', word: 'resilient',      ipa: '/rɪˈzɪliənt/',    pos: 'adj',          meaning: 'Kiên cường, mau phục hồi sau khó khăn',  exampleEn: 'Resilient people bounce back stronger after facing setbacks.', exampleVi: 'Những người kiên cường sẽ đứng dậy mạnh mẽ hơn sau khi đối mặt với thất bại.' },
+      { id: 'e55', topic: '5', word: 'sincere',        ipa: '/sɪnˈsɪə(r)/',    pos: 'adj',          meaning: 'Chân thành, thành thật',                 exampleEn: 'Please accept my sincere apologies for the misunderstanding.', exampleVi: 'Xin hãy chấp nhận lời xin lỗi chân thành của tôi về sự hiểu lầm này.' },
+
+      // --- CHỦ ĐỀ 6: CỤM ĐỘNG TỪ & THÀNH NGỮ (11 từ) ---
+      { id: 'e56', topic: '6', word: 'figure out',            ipa: '/ˈfɪɡər aʊt/',             pos: 'phrasal verb', meaning: 'Tìm ra cách giải quyết, hiểu ra',        exampleEn: 'It took us an hour to figure out how to assemble the desk.', exampleVi: 'Chúng tôi mất một tiếng để tìm ra cách lắp ráp chiếc bàn.' },
+      { id: 'e57', topic: '6', word: 'look forward to',       ipa: '/lʊk ˈfɔːwəd tuː/',        pos: 'phrasal verb', meaning: 'Mong đợi, háo hức chờ đón',              exampleEn: 'I look forward to hearing from you soon.',                   exampleVi: 'Tôi rất mong sớm nhận được hồi âm từ bạn.' },
+      { id: 'e58', topic: '6', word: 'carry out',             ipa: '/ˈkæri aʊt/',              pos: 'phrasal verb', meaning: 'Tiến hành, thực hiện',                   exampleEn: 'The researchers will carry out a survey next month.',        exampleVi: 'Các nhà nghiên cứu sẽ tiến hành một cuộc khảo sát vào tháng tới.' },
+      { id: 'e59', topic: '6', word: 'run out of',            ipa: '/rʌn aʊt əv/',             pos: 'phrasal verb', meaning: 'Cạn kiệt, hết sạch',                     exampleEn: 'We ran out of milk, so I need to stop by the supermarket.',  exampleVi: 'Chúng ta hết sạch sữa rồi, nên tôi cần ghé qua siêu thị.' },
+      { id: 'e60', topic: '6', word: 'call it a day',         ipa: '/kɔːl ɪt ə deɪ/',          pos: 'idiom',        meaning: 'Kết thúc công việc trong ngày để nghỉ',  exampleEn: 'We have finished all the urgent tasks—let’s call it a day!',  exampleVi: 'Chúng ta đã xong hết việc gấp rồi — nghỉ tay thôi nào!' },
+      { id: 'e61', topic: '6', word: 'piece of cake',         ipa: '/piːs əv keɪk/',           pos: 'idiom',        meaning: 'Dễ như ăn bánh (rất dễ dàng)',           exampleEn: 'After weeks of practice, the speaking test felt like a piece of cake.', exampleVi: 'Sau nhiều tuần luyện tập, bài thi nói trở nên dễ như ăn bánh.' },
+      { id: 'e62', topic: '6', word: 'break the ice',         ipa: '/breɪk ði aɪs/',           pos: 'idiom',        meaning: 'Phá vỡ sự ngại ngùng ban đầu',           exampleEn: 'The host told a funny story to break the ice at the party.', exampleVi: 'Chủ nhà kể một câu chuyện hài hước để phá vỡ bầu không khí ngại ngùng.' },
+      { id: 'e63', topic: '6', word: 'on the same page',      ipa: '/ɒn ðə seɪm peɪdʒ/',       pos: 'idiom',        meaning: 'Đồng quan điểm, hiểu thống nhất',        exampleEn: 'Let’s have a quick call to make sure everyone is on the same page.', exampleVi: 'Hãy gọi nhanh một cuộc để đảm bảo mọi người đều hiểu thống nhất với nhau.' },
+      { id: 'e64', topic: '6', word: 'under the weather',     ipa: '/ˈʌndə ðə ˈweðə(r)/',      pos: 'idiom',        meaning: 'Cảm thấy hơi mệt, không được khỏe',      exampleEn: 'I am feeling a bit under the weather today, so I will rest at home.', exampleVi: 'Hôm nay tôi thấy hơi mệt trong người nên sẽ nghỉ ngơi ở nhà.' },
+      { id: 'e65', topic: '6', word: 'hit the nail on the head', ipa: '/hɪt ðə neɪl ɒn ðə hed/', pos: 'idiom',     meaning: 'Nói trúng phóc, nhận định chính xác',    exampleEn: 'You hit the nail on the head with your analysis of the problem.', exampleVi: 'Bạn đã nói trúng phóc vấn đề qua phần phân tích của mình.' },
+      { id: 'e66', topic: '6', word: 'once in a blue moon',   ipa: '/wʌns ɪn ə bluː muːn/',    pos: 'idiom',        meaning: 'Rất hiếm khi, năm thì mười họa',         exampleEn: 'Living in different cities, we only see each other once in a blue moon.', exampleVi: 'Sống ở hai thành phố khác nhau nên chúng tôi rất hiếm khi gặp nhau.' }
+    ];
+
+    // 4. KHÓA LƯU TRỮ LOCALSTORAGE & TRẠNG THÁI ỨNG DỤNG
+    const STORAGE_KEYS = {
+      LEARNED: 'anhngu_learned_ids_v2',
+      CUSTOM_TOPICS: 'anhngu_custom_topics_v2',
+      CUSTOM_WORDS: 'anhngu_custom_words_v2',
+      EDITED_DEFAULTS: 'anhngu_edited_defaults_v2',
+      DELETED_DEFAULTS: 'anhngu_deleted_defaults_v2',
+      ACCENT: 'anhngu_voice_accent_v2'
+    };
+
+    let state = {
+      currentMode: 'flashcards', // 'flashcards' | 'quiz' | 'dictation' | 'library'
+      selectedTopic: '0',        // '0' = Tất cả chủ đề
+      voiceAccent: 'en-US',      // 'en-US' | 'en-GB'
+      learnedIds: new Set(),
+      customTopics: [],
+      customWords: [],
+      editedDefaults: {},
+      deletedDefaultIds: new Set(),
+
+      // Topic delete confirmation state
+      pendingDeleteTopicId: null,
+
+      // Flashcards state
+      fcQueue: [],
+      fcIndex: 0,
+      fcFlipped: false,
+
+      // Quiz state
+      quizPool: [],
+      quizIndex: 0,
+      quizCurrentWord: null,
+      quizOptions: [],
+      quizAnswered: false,
+      quizScore: 0,
+      quizStreak: 0,
+      quizBestStreak: 0,
+      quizCorrectCount: 0,
+      quizWrongWords: [],
+
+      // Dictation state
+      dictCurrentWord: null,
+      dictHintCount: 0,
+      dictChecked: false,
+      dictShowMeaning: true
+    };
+
+    // 5. HỆ THỐNG PHÁT ÂM TIẾNG ANH (WEB SPEECH API en-US / en-GB)
+    const SpeechManager = {
+      voices: [],
+      supported: 'speechSynthesis' in window,
+      warnedOnce: false,
+
+      init() {
+        if (!this.supported) {
+          this.showUnsupportedNotice();
+          return;
+        }
+        const loadVoices = () => {
+          this.voices = window.speechSynthesis.getVoices();
+          const hasEnglish = this.voices.some(v => v.lang.toLowerCase().startsWith('en'));
+          if (this.voices.length > 0 && !hasEnglish) {
+            document.getElementById('speechStatusBadge').classList.remove('hidden');
+          } else if (hasEnglish) {
+            document.getElementById('speechStatusBadge').classList.add('hidden');
+          }
+        };
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+      },
+
+      getPreferredVoice(accent) {
+        if (!this.voices || this.voices.length === 0) {
+          this.voices = window.speechSynthesis.getVoices();
+        }
+        const targetLang = accent.toLowerCase(); // 'en-us' hoặc 'en-gb'
+        let match = this.voices.find(v => v.lang.toLowerCase() === targetLang);
+        if (!match && accent === 'en-GB') {
+          match = this.voices.find(v => v.lang.toLowerCase().includes('gb') || v.name.toLowerCase().includes('uk'));
+        }
+        if (!match && accent === 'en-US') {
+          match = this.voices.find(v => v.lang.toLowerCase().includes('us') || v.name.toLowerCase().includes('us'));
+        }
+        if (!match) {
+          match = this.voices.find(v => v.lang.toLowerCase().startsWith('en'));
+        }
+        return match || null;
+      },
+
+      showUnsupportedNotice() {
+        document.getElementById('speechStatusBadge').classList.remove('hidden');
+        if (!this.warnedOnce) {
+          this.warnedOnce = true;
+          showToast('Trình duyệt của bạn chưa hỗ trợ giọng đọc TTS tiếng Anh. Hãy thử Chrome, Edge hoặc Safari nhé!', 'warning');
+        }
+      },
+
+      speak(text, rate = 1.0, btnElement = null) {
+        if (!text) return;
+        if (!this.supported) {
+          this.showUnsupportedNotice();
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+        document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+
+        const voice = this.getPreferredVoice(state.voiceAccent);
+        if (this.voices.length > 0 && !voice && !this.warnedOnce) {
+          this.warnedOnce = true;
+          document.getElementById('speechStatusBadge').classList.remove('hidden');
+          showToast('Thiết bị chưa cài gói giọng đọc tiếng Anh. Hệ thống sẽ cố gắng đọc bằng giọng mặc định.', 'warning');
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = state.voiceAccent;
+        if (voice) {
+          utterance.voice = voice;
+        }
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+
+        if (btnElement) {
+          btnElement.classList.add('speaking-active');
+        }
+
+        utterance.onend = () => {
+          if (btnElement) btnElement.classList.remove('speaking-active');
+        };
+        utterance.onerror = () => {
+          if (btnElement) btnElement.classList.remove('speaking-active');
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    // 6. HÀM TRUY XUẤT CHỦ ĐỀ & TỪ VỰNG
+    function getAllTopics() {
+      return [...DEFAULT_TOPICS, ...state.customTopics];
+    }
+
+    function getTopicById(topicId) {
+      const idStr = String(topicId);
+      return getAllTopics().find(t => String(t.id) === idStr) || {
+        id: idStr,
+        name: 'Chủ đề chung',
+        icon: '📚',
+        color: 'indigo',
+        isCustom: false
+      };
+    }
+
+    function getTopicColorClasses(colorKey) {
+      return TOPIC_COLORS[colorKey] || TOPIC_COLORS.indigo;
+    }
+
+    function getAllWords() {
+      const activeDefaults = DEFAULT_VOCABULARY
+        .filter(w => !state.deletedDefaultIds.has(w.id))
+        .map(w => {
+          if (state.editedDefaults[w.id]) {
+            return { ...w, ...state.editedDefaults[w.id], id: w.id, isCustom: false };
+          }
+          return w;
+        });
+      return [...activeDefaults, ...state.customWords];
+    }
+
+    function getFilteredWordsByTopic() {
+      const all = getAllWords();
+      if (String(state.selectedTopic) === '0') return all;
+      return all.filter(w => String(w.topic) === String(state.selectedTopic));
+    }
+
+    // 7. LƯU TRỮ LOCALSTORAGE & SAO LƯU / KHÔI PHỤC JSON
+    function loadFromStorage() {
+      try {
+        const savedLearned = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEARNED) || '[]');
+        state.learnedIds = new Set(savedLearned);
+
+        const savedTopics = JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOM_TOPICS) || '[]');
+        state.customTopics = Array.isArray(savedTopics) ? savedTopics : [];
+
+        const savedWords = JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOM_WORDS) || '[]');
+        state.customWords = Array.isArray(savedWords) ? savedWords : [];
+
+        const savedEdited = JSON.parse(localStorage.getItem(STORAGE_KEYS.EDITED_DEFAULTS) || '{}');
+        state.editedDefaults = (savedEdited && typeof savedEdited === 'object') ? savedEdited : {};
+
+        const savedDeleted = JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_DEFAULTS) || '[]');
+        state.deletedDefaultIds = new Set(savedDeleted);
+
+        const savedAccent = localStorage.getItem(STORAGE_KEYS.ACCENT);
+        if (savedAccent === 'en-US' || savedAccent === 'en-GB') {
+          state.voiceAccent = savedAccent;
+        }
+      } catch (e) {
+        console.error('Lỗi đọc localStorage:', e);
+      }
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.LEARNED, JSON.stringify([...state.learnedIds]));
+        localStorage.setItem(STORAGE_KEYS.CUSTOM_TOPICS, JSON.stringify(state.customTopics));
+        localStorage.setItem(STORAGE_KEYS.CUSTOM_WORDS, JSON.stringify(state.customWords));
+        localStorage.setItem(STORAGE_KEYS.EDITED_DEFAULTS, JSON.stringify(state.editedDefaults));
+        localStorage.setItem(STORAGE_KEYS.DELETED_DEFAULTS, JSON.stringify([...state.deletedDefaultIds]));
+        localStorage.setItem(STORAGE_KEYS.ACCENT, state.voiceAccent);
+      } catch (e) {
+        console.error('Lỗi lưu localStorage:', e);
+      }
+      updateHeaderStats();
+    }
+
+    function updateHeaderStats() {
+      const allWords = getAllWords();
+      const total = allWords.length;
+      const validIds = new Set(allWords.map(w => w.id));
+      let learnedCount = 0;
+      state.learnedIds.forEach(id => {
+        if (validIds.has(id)) learnedCount++;
+      });
+
+      const percent = total > 0 ? Math.round((learnedCount / total) * 100) : 0;
+      document.getElementById('learnedCountText').textContent = learnedCount;
+      document.getElementById('totalCountText').textContent = total;
+      document.getElementById('progressPercentText').textContent = percent;
+      document.getElementById('headerProgressBar').style.width = `${percent}%`;
+    }
+
+    function setVoiceAccent(accent) {
+      state.voiceAccent = accent;
+      saveToStorage();
+      updateAccentButtonsUI();
+      const label = accent === 'en-US' ? 'Anh-Mỹ (en-US)' : 'Anh-Anh (en-GB)';
+      showToast(`Đã chuyển giọng đọc sang ${label}`, 'info');
+    }
+
+    function updateAccentButtonsUI() {
+      const isUS = state.voiceAccent === 'en-US';
+      document.querySelectorAll('.accent-btn-us').forEach(btn => {
+        if (isUS) {
+          btn.classList.add('bg-white', 'text-indigo-700', 'shadow-xs');
+          btn.classList.remove('text-slate-500', 'text-slate-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-indigo-700', 'shadow-xs');
+          btn.classList.add('text-slate-500');
+        }
+      });
+      document.querySelectorAll('.accent-btn-uk').forEach(btn => {
+        if (!isUS) {
+          btn.classList.add('bg-white', 'text-indigo-700', 'shadow-xs');
+          btn.classList.remove('text-slate-500', 'text-slate-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-indigo-700', 'shadow-xs');
+          btn.classList.add('text-slate-500');
+        }
+      });
+    }
+
+    // =========================================================================
+    // HỘP THOẠI SAO LƯU / KHÔI PHỤC JSON & ĐẶT LẠI DỮ LIỆU MẶC ĐỊNH
+    // =========================================================================
+    function buildBackupPayload() {
+      return {
+        app: 'AnhNguStudio',
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        voiceAccent: state.voiceAccent,
+        customTopics: state.customTopics,
+        customWords: state.customWords,
+        editedDefaults: state.editedDefaults,
+        deletedDefaultIds: [...state.deletedDefaultIds],
+        learnedIds: [...state.learnedIds]
+      };
+    }
+
+    function openJsonModal() {
+      const modal = document.getElementById('jsonModal');
+      document.getElementById('jsonExportPreview').value = JSON.stringify(buildBackupPayload(), null, 2);
+      document.getElementById('jsonImportTextarea').value = '';
+      toggleResetConfirm(false);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeJsonModal() {
+      const modal = document.getElementById('jsonModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyBackupJsonToClipboard() {
+      const textarea = document.getElementById('jsonExportPreview');
+      textarea.select();
+      textarea.setSelectionRange(0, 999999);
+      try {
+        document.execCommand('copy');
+        showToast('Đã sao chép chuỗi JSON sao lưu vào bộ nhớ tạm!', 'success');
+      } catch (e) {
+        showToast('Không thể tự động sao chép, bạn hãy chọn và Ctrl+C nhé!', 'warning');
+      }
+    }
+
+    function downloadBackupJsonFile() {
+      const jsonStr = JSON.stringify(buildBackupPayload(), null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `anhngu-studio-backup-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Đã tải xuống file sao lưu JSON thành công!', 'success');
+    }
+
+    function handleJsonFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('jsonImportTextarea').value = e.target.result;
+        applyJsonBackupData(e.target.result);
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function restoreFromPastedJson() {
+      const raw = document.getElementById('jsonImportTextarea').value.trim();
+      if (!raw) {
+        showToast('Vui lòng dán chuỗi JSON hoặc tải lên file .json trước!', 'warning');
+        return;
+      }
+      applyJsonBackupData(raw);
+    }
+
+    function applyJsonBackupData(rawJsonString) {
+      try {
+        const parsed = JSON.parse(rawJsonString);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Dữ liệu JSON không hợp lệ');
+        }
+
+        // Gộp chủ đề tự tạo
+        if (Array.isArray(parsed.customTopics)) {
+          const existingTopicIds = new Set(state.customTopics.map(t => String(t.id)));
+          parsed.customTopics.forEach(t => {
+            if (t && t.id && t.name && !existingTopicIds.has(String(t.id))) {
+              state.customTopics.push({
+                id: String(t.id),
+                name: String(t.name),
+                icon: t.icon || '📚',
+                color: TOPIC_COLORS[t.color] ? t.color : 'indigo',
+                isCustom: true
+              });
+              existingTopicIds.add(String(t.id));
+            }
+          });
+        }
+
+        // Gộp từ vựng tự tạo
+        if (Array.isArray(parsed.customWords)) {
+          const existingWordIds = new Set(state.customWords.map(w => String(w.id)));
+          parsed.customWords.forEach(w => {
+            if (w && w.id && w.word && w.meaning && !existingWordIds.has(String(w.id))) {
+              state.customWords.push({
+                id: String(w.id),
+                topic: String(w.topic || '1'),
+                word: String(w.word),
+                ipa: String(w.ipa || ''),
+                pos: String(w.pos || 'noun'),
+                meaning: String(w.meaning),
+                exampleEn: String(w.exampleEn || ''),
+                exampleVi: String(w.exampleVi || ''),
+                isCustom: true
+              });
+              existingWordIds.add(String(w.id));
+            }
+          });
+        }
+
+        // Gộp chỉnh sửa & xóa từ mặc định
+        if (parsed.editedDefaults && typeof parsed.editedDefaults === 'object') {
+          state.editedDefaults = { ...state.editedDefaults, ...parsed.editedDefaults };
+        }
+        if (Array.isArray(parsed.deletedDefaultIds)) {
+          parsed.deletedDefaultIds.forEach(id => state.deletedDefaultIds.add(String(id)));
+        }
+
+        // Gộp danh sách từ đã thuộc
+        if (Array.isArray(parsed.learnedIds)) {
+          parsed.learnedIds.forEach(id => state.learnedIds.add(String(id)));
+        }
+
+        if (parsed.voiceAccent === 'en-US' || parsed.voiceAccent === 'en-GB') {
+          state.voiceAccent = parsed.voiceAccent;
+          updateAccentButtonsUI();
+        }
+
+        saveToStorage();
+        refreshAllViews();
+        document.getElementById('jsonExportPreview').value = JSON.stringify(buildBackupPayload(), null, 2);
+        showToast('Đã khôi phục dữ liệu từ bản sao lưu JSON thành công!', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Chuỗi JSON không hợp lệ hoặc sai cấu trúc!', 'error');
+      }
+    }
+
+    function toggleResetConfirm(showConfirm) {
+      document.getElementById('resetDefaultStep1').classList.toggle('hidden', showConfirm);
+      document.getElementById('resetDefaultStep2').classList.toggle('hidden', !showConfirm);
+    }
+
+    function executeFullResetToDefault() {
+      state.learnedIds.clear();
+      state.customTopics = [];
+      state.customWords = [];
+      state.editedDefaults = {};
+      state.deletedDefaultIds.clear();
+      state.selectedTopic = '0';
+
+      saveToStorage();
+      refreshAllViews();
+      closeJsonModal();
+      showToast('Đã đặt lại toàn bộ dữ liệu về mặc định ban đầu!', 'info');
+    }
+
+    // 8. THÔNG BÁO TOAST
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        warning: 'bg-amber-500 text-white border-amber-400',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-pop ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span class="flex-1 leading-snug">${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3100);
+    }
+
+    // 9. RENDER THANH CHỦ ĐỀ & CHUYỂN CHẾ ĐỘ HỌC
+    function renderTopicPills() {
+      const container = document.getElementById('topicPillsContainer');
+      const allWords = getAllWords();
+      const allTopics = getAllTopics();
+
+      document.getElementById('topicCountSummary').textContent = `${allTopics.length} chủ đề`;
+
+      const isAllActive = String(state.selectedTopic) === '0';
+
+      let html = `
+        <button
+          onclick="selectTopic('0')"
+          class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+            isAllActive
+              ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200'
+              : 'bg-white text-slate-700 border-slate-200/90 hover:border-indigo-300 hover:text-indigo-700'
+          }"
+        >
+          <span>✨</span>
+          <span>Tất cả chủ đề (${allWords.length})</span>
+        </button>
+      `;
+
+      html += allTopics.map((topic, idx) => {
+        const topicWords = allWords.filter(w => String(w.topic) === String(topic.id));
+        const isActive = String(state.selectedTopic) === String(topic.id);
+        const colorObj = getTopicColorClasses(topic.color);
+        const displayPrefix = !topic.isCustom ? `${idx + 1}. ` : '';
+
+        return `
+          <button
+            onclick="selectTopic('${topic.id}')"
+            class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              isActive
+                ? `${colorObj.active} shadow-md`
+                : 'bg-white text-slate-700 border-slate-200/90 hover:border-indigo-300'
+            }"
+          >
+            <span>${escapeHtml(topic.icon)}</span>
+            <span>${escapeHtml(displayPrefix + topic.name)}</span>
+            <span class="px-1.5 py-0.5 rounded-md text-[10px] ${
+              isActive ? 'bg-white/20 text-white' : colorObj.badge
+            }">
+              ${topicWords.length}
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    function selectTopic(topicId) {
+      state.selectedTopic = String(topicId);
+      renderTopicPills();
+      refreshCurrentModeView();
+    }
+
+    function refreshCurrentModeView() {
+      if (state.currentMode === 'flashcards') {
+        initFlashcards();
+      } else if (state.currentMode === 'quiz') {
+        startQuizSession();
+      } else if (state.currentMode === 'dictation') {
+        nextDictationWord();
+      } else if (state.currentMode === 'library') {
+        renderLibrary();
+      }
+    }
+
+    function refreshAllViews() {
+      updateHeaderStats();
+      renderTopicPills();
+      refreshCurrentModeView();
+    }
+
+    function switchMode(mode) {
+      state.currentMode = mode;
+
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('bg-white', 'text-indigo-700', 'shadow-xs', 'font-bold');
+        tab.classList.add('text-slate-600', 'font-semibold');
+      });
+      const activeTab = document.getElementById(`tab-${mode}`);
+      if (activeTab) {
+        activeTab.classList.add('bg-white', 'text-indigo-700', 'shadow-xs', 'font-bold');
+        activeTab.classList.remove('text-slate-600', 'font-semibold');
+      }
+
+      document.querySelectorAll('.mode-view').forEach(view => view.classList.add('hidden'));
+      document.getElementById(`view-${mode}`).classList.remove('hidden');
+
+      refreshCurrentModeView();
+    }
+
+    function buildEmptyTopicCardHtml(topicObj) {
+      return `
+        <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-4 text-3xl">
+          ${escapeHtml(topicObj.icon || '📂')}
+        </div>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">Chủ đề "${escapeHtml(topicObj.name)}" chưa có từ vựng</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mb-6 max-w-md mx-auto">
+          Hãy thêm từ vựng mới hoặc nhập nhanh danh sách từ hàng loạt vào chủ đề này để bắt đầu luyện tập nhé!
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button onclick="openWordFormModal(null, '${topicObj.id}')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+            + Thêm từ vào chủ đề này
+          </button>
+          <button onclick="openBulkImportModal('${topicObj.id}')" class="px-5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs sm:text-sm transition cursor-pointer">
+            📥 Thêm hàng loạt
+          </button>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // QUẢN LÝ & TẠO CHỦ ĐỀ MỚI (TOPIC MANAGER MODAL + QUICK CREATE)
+    // =========================================================================
+    function openTopicManagerModal(initialFocus = 'create') {
+      const modal = document.getElementById('topicManagerModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      state.pendingDeleteTopicId = null;
+      resetTopicForm();
+      renderTopicPickerControls();
+      renderTopicsInManager();
+
+      if (initialFocus === 'create') {
+        setTimeout(() => document.getElementById('topicNameInput').focus(), 80);
+      }
+    }
+
+    function closeTopicManagerModal() {
+      const modal = document.getElementById('topicManagerModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      state.pendingDeleteTopicId = null;
+    }
+
+    function renderTopicPickerControls() {
+      // Bảng chọn nhanh 24 biểu tượng Emoji
+      const emojiPicker = document.getElementById('topicEmojiPicker');
+      emojiPicker.innerHTML = EMOJI_PRESETS.map(em => `
+        <button type="button" onclick="selectTopicEmoji('${em}')" class="w-8 h-8 rounded-xl bg-white hover:bg-indigo-50 border border-slate-200/80 flex items-center justify-center text-base transition active:scale-90 cursor-pointer">
+          ${em}
+        </button>
+      `).join('');
+
+      // Bảng chọn 8 tông màu nhãn
+      const colorPicker = document.getElementById('topicColorPicker');
+      const currentColor = document.getElementById('topicForm').dataset.selectedColor || 'indigo';
+      colorPicker.innerHTML = Object.entries(TOPIC_COLORS).map(([key, val]) => {
+        const isSelected = key === currentColor;
+        return `
+          <button
+            type="button"
+            onclick="selectTopicColor('${key}')"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+              isSelected ? 'bg-white border-indigo-600 ring-2 ring-indigo-200 text-slate-900' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+            }"
+          >
+            <span class="w-3 h-3 rounded-full ${val.dot}"></span>
+            <span>${val.label}</span>
+          </button>
+        `;
+      }).join('');
+
+      updateTopicPreviewBadge();
+    }
+
+    function selectTopicEmoji(emoji) {
+      document.getElementById('topicEmojiInput').value = emoji;
+      updateTopicPreviewBadge();
+    }
+
+    function selectTopicColor(colorKey) {
+      document.getElementById('topicForm').dataset.selectedColor = colorKey;
+      renderTopicPickerControls();
+    }
+
+    function updateTopicPreviewBadge() {
+      const name = document.getElementById('topicNameInput').value.trim() || 'Chủ đề mới';
+      const icon = document.getElementById('topicEmojiInput').value.trim() || '📚';
+      const colorKey = document.getElementById('topicForm').dataset.selectedColor || 'indigo';
+      const colorObj = getTopicColorClasses(colorKey);
+
+      const preview = document.getElementById('topicPreviewBadge');
+      preview.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${colorObj.badge}`;
+      preview.innerHTML = `<span>${escapeHtml(icon)}</span><span>${escapeHtml(name)}</span>`;
+    }
+
+    document.getElementById('topicNameInput').addEventListener('input', updateTopicPreviewBadge);
+    document.getElementById('topicEmojiInput').addEventListener('input', updateTopicPreviewBadge);
+
+    function resetTopicForm() {
+      document.getElementById('editingTopicId').value = '';
+      document.getElementById('topicNameInput').value = '';
+      document.getElementById('topicEmojiInput').value = '📚';
+      document.getElementById('topicForm').dataset.selectedColor = 'indigo';
+      document.getElementById('topicFormModeLabel').textContent = '✨ Tạo chủ đề mới';
+      document.getElementById('topicSaveBtn').textContent = '+ Tạo chủ đề';
+      document.getElementById('cancelTopicEditBtn').classList.add('hidden');
+      renderTopicPickerControls();
+    }
+
+    function startEditTopic(topicId) {
+      const topic = state.customTopics.find(t => String(t.id) === String(topicId));
+      if (!topic) return;
+
+      document.getElementById('editingTopicId').value = topic.id;
+      document.getElementById('topicNameInput').value = topic.name;
+      document.getElementById('topicEmojiInput').value = topic.icon;
+      document.getElementById('topicForm').dataset.selectedColor = topic.color || 'indigo';
+
+      document.getElementById('topicFormModeLabel').textContent = '✏️ Đang chỉnh sửa chủ đề';
+      document.getElementById('topicSaveBtn').textContent = 'Lưu thay đổi';
+      document.getElementById('cancelTopicEditBtn').classList.remove('hidden');
+
+      renderTopicPickerControls();
+      document.getElementById('topicNameInput').focus();
+    }
+
+    function handleTopicFormSubmit(event) {
+      event.preventDefault();
+      const editingId = document.getElementById('editingTopicId').value.trim();
+      const name = document.getElementById('topicNameInput').value.trim();
+      const icon = document.getElementById('topicEmojiInput').value.trim() || '📚';
+      const color = document.getElementById('topicForm').dataset.selectedColor || 'indigo';
+
+      if (!name) return;
+
+      if (editingId) {
+        const idx = state.customTopics.findIndex(t => String(t.id) === editingId);
+        if (idx !== -1) {
+          state.customTopics[idx] = { ...state.customTopics[idx], name, icon, color };
+          saveToStorage();
+          refreshAllViews();
+          renderTopicsInManager();
+          resetTopicForm();
+          showToast(`Đã cập nhật chủ đề "${name}"!`, 'success');
+        }
+      } else {
+        const newTopic = {
+          id: 'topic_en_' + Date.now(),
+          name,
+          icon,
+          color,
+          isCustom: true
+        };
+        state.customTopics.push(newTopic);
+        state.selectedTopic = newTopic.id;
+        saveToStorage();
+        refreshAllViews();
+        renderTopicsInManager();
+        resetTopicForm();
+        showToast(`Đã tạo chủ đề mới "${icon} ${name}"!`, 'success');
+      }
+    }
+
+    function requestDeleteTopic(topicId) {
+      const allWords = getAllWords();
+      const wordsInTopic = allWords.filter(w => String(w.topic) === String(topicId));
+
+      if (wordsInTopic.length === 0) {
+        executeDeleteTopic(topicId, 'delete_words');
+      } else {
+        state.pendingDeleteTopicId = String(topicId);
+        renderTopicsInManager();
+      }
+    }
+
+    function cancelDeleteTopic() {
+      state.pendingDeleteTopicId = null;
+      renderTopicsInManager();
+    }
+
+    function executeDeleteTopic(topicId, action, targetMoveTopicId = '1') {
+      const idStr = String(topicId);
+      const topicObj = getTopicById(idStr);
+
+      if (action === 'move_words') {
+        state.customWords = state.customWords.map(w =>
+          String(w.topic) === idStr ? { ...w, topic: String(targetMoveTopicId) } : w
+        );
+        // Nếu có từ mặc định từng bị sửa chuyển sang chủ đề này, cũng chuyển sang chủ đề đích
+        Object.keys(state.editedDefaults).forEach(defId => {
+          if (String(state.editedDefaults[defId].topic) === idStr) {
+            state.editedDefaults[defId].topic = String(targetMoveTopicId);
+          }
+        });
+      } else {
+        const removedIds = new Set(
+          state.customWords.filter(w => String(w.topic) === idStr).map(w => w.id)
+        );
+        state.customWords = state.customWords.filter(w => String(w.topic) !== idStr);
+        removedIds.forEach(wid => state.learnedIds.delete(wid));
+      }
+
+      state.customTopics = state.customTopics.filter(t => String(t.id) !== idStr);
+      if (String(state.selectedTopic) === idStr) {
+        state.selectedTopic = '0';
+      }
+      state.pendingDeleteTopicId = null;
+
+      saveToStorage();
+      refreshAllViews();
+      renderTopicsInManager();
+      showToast(`Đã xóa chủ đề "${topicObj.name}".`, 'info');
+    }
+
+    function renderTopicsInManager() {
+      const allWords = getAllWords();
+      const customListEl = document.getElementById('customTopicsList');
+      const defaultListEl = document.getElementById('defaultTopicsList');
+      document.getElementById('customTopicsCountLabel').textContent = state.customTopics.length;
+
+      if (state.customTopics.length === 0) {
+        customListEl.innerHTML = `
+          <div class="text-center py-5 px-4 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-400">
+            Bạn chưa tạo chủ đề riêng nào. Hãy nhập tên chủ đề ở khung phía trên để tạo ngay nhé!
+          </div>
+        `;
+      } else {
+        customListEl.innerHTML = state.customTopics.map(topic => {
+          const count = allWords.filter(w => String(w.topic) === String(topic.id)).length;
+          const colorObj = getTopicColorClasses(topic.color);
+          const isPendingDelete = String(state.pendingDeleteTopicId) === String(topic.id);
+
+          if (isPendingDelete) {
+            const otherTopics = getAllTopics().filter(t => String(t.id) !== String(topic.id));
+            return `
+              <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-3 animate-pop">
+                <p class="text-xs font-bold text-rose-900">
+                  ⚠️ Chủ đề "${escapeHtml(topic.name)}" đang chứa <strong>${count} từ vựng</strong>. Bạn muốn xử lý số từ này thế nào?
+                </p>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <select id="moveTargetSelect-${topic.id}" class="flex-1 text-xs font-semibold px-3 py-2 rounded-xl bg-white border border-rose-200 text-slate-700">
+                    ${otherTopics.map(ot => `<option value="${ot.id}">Chuyển sang: ${escapeHtml(ot.icon)} ${escapeHtml(ot.name)}</option>`).join('')}
+                  </select>
+                  <button type="button" onclick="executeDeleteTopic('${topic.id}', 'move_words', document.getElementById('moveTargetSelect-${topic.id}').value)" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer">
+                    Chuyển từ & Xóa chủ đề
+                  </button>
+                  <button type="button" onclick="executeDeleteTopic('${topic.id}', 'delete_words')" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer">
+                    Xóa tất cả
+                  </button>
+                  <button type="button" onclick="cancelDeleteTopic()" class="px-3 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 text-xs font-semibold cursor-pointer">
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-200 transition">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-9 h-9 rounded-xl flex items-center justify-center text-lg border ${colorObj.badge} shrink-0">${escapeHtml(topic.icon)}</span>
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-900 truncate">${escapeHtml(topic.name)}</p>
+                  <p class="text-[11px] text-slate-500">${count} từ vựng</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="selectTopic('${topic.id}'); closeTopicManagerModal();" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition cursor-pointer">
+                  Học ngay
+                </button>
+                <button type="button" onclick="startEditTopic('${topic.id}')" title="Sửa chủ đề" class="p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button type="button" onclick="requestDeleteTopic('${topic.id}')" title="Xóa chủ đề" class="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      defaultListEl.innerHTML = DEFAULT_TOPICS.map((topic, idx) => {
+        const count = allWords.filter(w => String(w.topic) === String(topic.id)).length;
+        const colorObj = getTopicColorClasses(topic.color);
+        return `
+          <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center text-sm border ${colorObj.badge} shrink-0">${topic.icon}</span>
+              <span class="text-xs font-bold text-slate-700 truncate">${idx + 1}. ${escapeHtml(topic.name)}</span>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400 shrink-0">${count} từ</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function populateTopicSelectDropdown(selectEl, preferredTopicId = null) {
+      const allTopics = getAllTopics();
+      selectEl.innerHTML = allTopics.map((t, idx) => {
+        const prefix = !t.isCustom ? `${idx + 1}. ` : '';
+        return `<option value="${t.id}">${escapeHtml(t.icon)} ${escapeHtml(prefix + t.name)}</option>`;
+      }).join('');
+
+      if (preferredTopicId && allTopics.some(t => String(t.id) === String(preferredTopicId))) {
+        selectEl.value = String(preferredTopicId);
+      } else if (String(state.selectedTopic) !== '0' && allTopics.some(t => String(t.id) === String(state.selectedTopic))) {
+        selectEl.value = String(state.selectedTopic);
+      }
+    }
+
+    function toggleQuickTopicBox(context, forceState = null) {
+      const box = document.getElementById(`quickTopicBox-${context}`);
+      const shouldShow = forceState !== null ? forceState : box.classList.contains('hidden');
+      box.classList.toggle('hidden', !shouldShow);
+      if (shouldShow) {
+        document.getElementById(`quickTopicName-${context}`).focus();
+      }
+    }
+
+    function submitQuickTopic(context) {
+      const nameInput = document.getElementById(`quickTopicName-${context}`);
+      const emojiInput = document.getElementById(`quickTopicEmoji-${context}`);
+      const colorSelect = document.getElementById(`quickTopicColor-${context}`);
+
+      const name = nameInput.value.trim();
+      const icon = emojiInput.value.trim() || '🎯';
+      const color = colorSelect.value || 'indigo';
+
+      if (!name) {
+        showToast('Vui lòng nhập tên chủ đề mới!', 'warning');
+        nameInput.focus();
+        return;
+      }
+
+      const newTopic = {
+        id: 'topic_en_' + Date.now(),
+        name,
+        icon,
+        color,
+        isCustom: true
+      };
+
+      state.customTopics.push(newTopic);
+      saveToStorage();
+      renderTopicPills();
+
+      const targetSelect = context === 'word'
+        ? document.getElementById('wordTopicSelect')
+        : document.getElementById('bulkTopicSelect');
+      populateTopicSelectDropdown(targetSelect, newTopic.id);
+
+      nameInput.value = '';
+      toggleQuickTopicBox(context, false);
+      showToast(`Đã tạo nhanh chủ đề "${icon} ${name}"!`, 'success');
+    }
+
+    // =========================================================================
+    // CHẾ ĐỘ 1: THẺ GHI NHỚ (FLASHCARDS)
+    // =========================================================================
+    function initFlashcards() {
+      const words = getFilteredWordsByTopic();
+      const unlearnedOnly = document.getElementById('toggleUnlearnedOnly').checked;
+
+      if (unlearnedOnly) {
+        state.fcQueue = words.filter(w => !state.learnedIds.has(w.id));
+      } else {
+        const unlearned = words.filter(w => !state.learnedIds.has(w.id));
+        const learned = words.filter(w => state.learnedIds.has(w.id));
+        state.fcQueue = [...unlearned, ...learned];
+      }
+
+      state.fcIndex = 0;
+      state.fcFlipped = false;
+      renderFlashcard();
+    }
+
+    function disableUnlearnedFilter() {
+      document.getElementById('toggleUnlearnedOnly').checked = false;
+      initFlashcards();
+    }
+
+    function renderFlashcard() {
+      const emptyState = document.getElementById('fcEmptyState');
+      const activeContainer = document.getElementById('fcActiveContainer');
+      const allTopicWords = getFilteredWordsByTopic();
+
+      if (allTopicWords.length === 0) {
+        emptyState.innerHTML = buildEmptyTopicCardHtml(getTopicById(state.selectedTopic));
+        emptyState.classList.remove('hidden');
+        activeContainer.classList.add('hidden');
+        document.getElementById('fcCounter').textContent = '0 / 0';
+        return;
+      }
+
+      if (state.fcQueue.length === 0) {
+        emptyState.innerHTML = `
+          <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-3xl">🎉</div>
+          <h3 class="text-xl font-extrabold text-slate-900 mb-2">Xuất sắc! Bạn đã thuộc hết từ trong chủ đề này!</h3>
+          <p class="text-sm text-slate-500 mb-6">Bạn có thể tắt bộ lọc "Chỉ từ chưa thuộc" để ôn lại toàn bộ thẻ hoặc chuyển sang làm Trắc nghiệm nhé.</p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button onclick="disableUnlearnedFilter()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition cursor-pointer">
+              Ôn lại toàn bộ thẻ
+            </button>
+            <button onclick="switchMode('quiz')" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-md shadow-emerald-200 transition cursor-pointer">
+              Làm Trắc nghiệm ngay →
+            </button>
+          </div>
+        `;
+        emptyState.classList.remove('hidden');
+        activeContainer.classList.add('hidden');
+        document.getElementById('fcCounter').textContent = '0 / 0';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      activeContainer.classList.remove('hidden');
+
+      if (state.fcIndex >= state.fcQueue.length) {
+        state.fcIndex = 0;
+      }
+
+      const word = state.fcQueue[state.fcIndex];
+      const topicObj = getTopicById(word.topic);
+      const colorObj = getTopicColorClasses(topicObj.color);
+
+      const inner = document.getElementById('flashcardInner');
+      inner.classList.toggle('rotate-y-180', state.fcFlipped);
+
+      document.getElementById('fcCounter').textContent = `${state.fcIndex + 1} / ${state.fcQueue.length}`;
+
+      const topicBadge = document.getElementById('fcTopicBadge');
+      topicBadge.className = `text-xs font-bold px-3 py-1 rounded-full border ${colorObj.badge}`;
+      topicBadge.textContent = `${topicObj.icon} ${topicObj.name}`;
+
+      document.getElementById('fcPosFrontBadge').textContent = word.pos;
+      document.getElementById('fcPosBackBadge').textContent = word.pos;
+
+      const isLearned = state.learnedIds.has(word.id);
+      document.getElementById('fcLearnedBadge').classList.toggle('hidden', !isLearned);
+
+      // Mặt trước
+      document.getElementById('fcWord').textContent = word.word;
+      const ipaEl = document.getElementById('fcIpa');
+      const showIpa = document.getElementById('toggleIpa').checked;
+      ipaEl.textContent = word.ipa;
+      ipaEl.style.visibility = showIpa ? 'visible' : 'hidden';
+
+      // Mặt sau
+      document.getElementById('fcBackWord').textContent = `${word.word} ${word.ipa}`;
+      document.getElementById('fcMeaning').textContent = word.meaning;
+      document.getElementById('fcExampleEn').textContent = word.exampleEn || 'No example sentence available.';
+      document.getElementById('fcExampleVi').textContent = word.exampleVi || 'Chưa có câu ví dụ cho từ này.';
+    }
+
+    function flipFlashcard() {
+      if (state.fcQueue.length === 0) return;
+      state.fcFlipped = !state.fcFlipped;
+      document.getElementById('flashcardInner').classList.toggle('rotate-y-180', state.fcFlipped);
+    }
+
+    function nextFlashcard() {
+      if (state.fcQueue.length === 0) return;
+      state.fcFlipped = false;
+      state.fcIndex = (state.fcIndex + 1) % state.fcQueue.length;
+      renderFlashcard();
+    }
+
+    function prevFlashcard() {
+      if (state.fcQueue.length === 0) return;
+      state.fcFlipped = false;
+      state.fcIndex = (state.fcIndex - 1 + state.fcQueue.length) % state.fcQueue.length;
+      renderFlashcard();
+    }
+
+    function shuffleFlashcards() {
+      if (state.fcQueue.length <= 1) return;
+      for (let i = state.fcQueue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.fcQueue[i], state.fcQueue[j]] = [state.fcQueue[j], state.fcQueue[i]];
+      }
+      state.fcIndex = 0;
+      state.fcFlipped = false;
+      renderFlashcard();
+      showToast('Đã trộn ngẫu nhiên bộ thẻ!', 'info');
+    }
+
+    function markFlashcard(isLearned) {
+      const currentWord = state.fcQueue[state.fcIndex];
+      if (!currentWord) return;
+
+      const unlearnedOnly = document.getElementById('toggleUnlearnedOnly').checked;
+
+      if (isLearned) {
+        state.learnedIds.add(currentWord.id);
+        saveToStorage();
+        showToast(`Đã đánh dấu thuộc: "${currentWord.word}"`, 'success');
+
+        if (unlearnedOnly) {
+          state.fcQueue.splice(state.fcIndex, 1);
+          state.fcFlipped = false;
+          renderFlashcard();
+        } else {
+          nextFlashcard();
+        }
+      } else {
+        state.learnedIds.delete(currentWord.id);
+        saveToStorage();
+        // Đưa thẻ về cuối hàng đợi để ôn lại trong phiên
+        const [removed] = state.fcQueue.splice(state.fcIndex, 1);
+        state.fcQueue.push(removed);
+        state.fcFlipped = false;
+        renderFlashcard();
+        showToast(`Đã đưa "${currentWord.word}" xuống cuối hàng đợi để ôn lại!`, 'warning');
+      }
+    }
+
+    function speakCurrentFlashcard(rate, btn) {
+      const word = state.fcQueue[state.fcIndex];
+      if (word) SpeechManager.speak(word.word, rate, btn);
+    }
+
+    function speakCurrentExample(btn) {
+      const word = state.fcQueue[state.fcIndex];
+      if (word && word.exampleEn) SpeechManager.speak(word.exampleEn, 1.0, btn);
+    }
+
+    // =========================================================================
+    // CHẾ ĐỘ 2: TRẮC NGHIỆM (QUIZ)
+    // =========================================================================
+    function startQuizSession(customPool = null) {
+      const emptyState = document.getElementById('quizEmptyState');
+      const playCard = document.getElementById('quizPlayCard');
+      const summaryCard = document.getElementById('quizSummaryCard');
+
+      let pool = customPool;
+      if (!pool) {
+        const topicWords = [...getFilteredWordsByTopic()];
+        if (topicWords.length === 0) {
+          emptyState.innerHTML = buildEmptyTopicCardHtml(getTopicById(state.selectedTopic));
+          emptyState.classList.remove('hidden');
+          playCard.classList.add('hidden');
+          summaryCard.classList.add('hidden');
+          return;
+        }
+        topicWords.sort(() => Math.random() - 0.5);
+        pool = topicWords.slice(0, Math.min(10, topicWords.length));
+      }
+
+      emptyState.classList.add('hidden');
+      playCard.classList.remove('hidden');
+      summaryCard.classList.add('hidden');
+
+      state.quizPool = pool;
+      state.quizIndex = 0;
+      state.quizScore = 0;
+      state.quizStreak = 0;
+      state.quizBestStreak = 0;
+      state.quizCorrectCount = 0;
+      state.quizWrongWords = [];
+
+      updateQuizHeaderMetrics();
+      renderQuizQuestion();
+    }
+
+    function startRetryWrongQuiz() {
+      if (state.quizWrongWords.length === 0) return;
+      const retryPool = [...state.quizWrongWords].sort(() => Math.random() - 0.5);
+      startQuizSession(retryPool);
+      showToast(`Bắt đầu ôn lại ${retryPool.length} từ vừa trả lời sai!`, 'info');
+    }
+
+    function updateQuizHeaderMetrics() {
+      const total = state.quizPool.length || 1;
+      const currentNum = Math.min(state.quizIndex + 1, total);
+      document.getElementById('quizCurrentNum').textContent = currentNum;
+      document.getElementById('quizTotalNum').textContent = total;
+      document.getElementById('quizScore').textContent = state.quizScore;
+      document.getElementById('quizStreak').textContent = state.quizStreak;
+      document.getElementById('quizProgressBar').style.width = `${Math.round((currentNum / total) * 100)}%`;
+    }
+
+    function renderQuizQuestion() {
+      const correctWord = state.quizPool[state.quizIndex];
+      if (!correctWord) return;
+
+      state.quizCurrentWord = correctWord;
+      state.quizAnswered = false;
+      updateQuizHeaderMetrics();
+
+      const allWords = getAllWords();
+      const topicWords = getFilteredWordsByTopic();
+
+      let distractorPool = topicWords.filter(w => w.id !== correctWord.id);
+      if (distractorPool.length < 3) {
+        const extra = allWords.filter(w => w.id !== correctWord.id && !distractorPool.some(d => d.id === w.id));
+        distractorPool = [...distractorPool, ...extra];
+      }
+      distractorPool.sort(() => Math.random() - 0.5);
+      const distractors = distractorPool.slice(0, 3);
+
+      state.quizOptions = [correctWord, ...distractors].sort(() => Math.random() - 0.5);
+
+      const quizType = document.getElementById('quizTypeSelect').value;
+      const topicObj = getTopicById(correctWord.topic);
+      const colorObj = getTopicColorClasses(topicObj.color);
+
+      const tagEl = document.getElementById('quizTopicTag');
+      tagEl.className = `text-xs font-bold px-3 py-1 rounded-full border ${colorObj.badge}`;
+      tagEl.textContent = `${topicObj.icon} ${topicObj.name}`;
+
+      document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+      const questionBox = document.getElementById('quizQuestionBox');
+      const promptLabel = document.getElementById('quizPromptLabel');
+      const safeWord = correctWord.word.replace(/'/g, "\\'");
+
+      if (quizType === 'en-to-vi') {
+        promptLabel.textContent = 'Từ tiếng Anh này có nghĩa là gì? (Phím 1–4)';
+        questionBox.innerHTML = `
+          <span class="inline-block font-ipa text-xs font-bold px-2.5 py-0.5 rounded-md bg-slate-200/80 text-slate-600 mb-2">${escapeHtml(correctWord.pos)}</span>
+          <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1.5">${escapeHtml(correctWord.word)}</p>
+          <p class="font-ipa text-sm font-medium text-indigo-600 mb-4">${escapeHtml(correctWord.ipa)}</p>
+          <div class="flex items-center justify-center gap-2">
+            <button onclick="SpeechManager.speak('${safeWord}', 1.0, this)" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+              🔊 Đọc chuẩn (1.0x)
+            </button>
+            <button onclick="SpeechManager.speak('${safeWord}', 0.7, this)" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 text-xs font-bold transition cursor-pointer">
+              🐢 Đọc chậm (0.7x)
+            </button>
+          </div>
+        `;
+        setTimeout(() => SpeechManager.speak(correctWord.word, 1.0), 200);
+      } else if (quizType === 'audio-to-vi') {
+        promptLabel.textContent = 'Nghe âm và chọn nghĩa tiếng Việt đúng (Phím 1–4)';
+        questionBox.innerHTML = `
+          <div class="py-2">
+            <button id="quizAudioMainBtn" onclick="SpeechManager.speak('${safeWord}', 1.0, this)" class="w-16 h-16 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center mx-auto shadow-lg shadow-indigo-200 transition active:scale-95 cursor-pointer mb-3">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+            </button>
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="SpeechManager.speak('${safeWord}', 1.0, this)" class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer">🔊 Nghe lại (1.0x)</button>
+              <span class="text-slate-300">•</span>
+              <button onclick="SpeechManager.speak('${safeWord}', 0.7, this)" class="text-xs font-bold text-slate-600 hover:text-indigo-600 cursor-pointer">🐢 Đọc chậm (0.7x)</button>
+            </div>
+          </div>
+        `;
+        setTimeout(() => {
+          const btn = document.getElementById('quizAudioMainBtn');
+          SpeechManager.speak(correctWord.word, 1.0, btn);
+        }, 250);
+      } else {
+        promptLabel.textContent = 'Chọn từ tiếng Anh tương ứng với nghĩa sau (Phím 1–4)';
+        questionBox.innerHTML = `
+          <span class="inline-block font-ipa text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 mb-2">${escapeHtml(correctWord.pos)}</span>
+          <p class="text-2xl sm:text-3xl font-extrabold text-slate-900">${escapeHtml(correctWord.meaning)}</p>
+        `;
+      }
+
+      const optionsGrid = document.getElementById('quizOptionsGrid');
+      optionsGrid.innerHTML = state.quizOptions.map((opt, idx) => {
+        const displayText = quizType === 'vi-to-en'
+          ? `<span class="text-base sm:text-lg font-bold block">${escapeHtml(opt.word)}</span><span class="font-ipa text-xs text-slate-400 font-normal">${escapeHtml(opt.ipa)}</span>`
+          : `<span class="text-sm sm:text-base font-bold">${escapeHtml(opt.meaning)}</span>`;
+
+        return `
+          <button
+            id="quizOptBtn-${opt.id}"
+            onclick="submitQuizAnswer('${opt.id}')"
+            class="quiz-option-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200/90 bg-white hover:border-indigo-400 hover:bg-indigo-50/40 transition-all flex items-center gap-3 cursor-pointer"
+          >
+            <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-extrabold text-xs flex items-center justify-center shrink-0">${idx + 1}</span>
+            <div class="flex-1">${displayText}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function submitQuizAnswer(selectedId) {
+      if (state.quizAnswered) return;
+      state.quizAnswered = true;
+
+      const correct = state.quizCurrentWord;
+      const isCorrect = selectedId === correct.id;
+
+      SpeechManager.speak(correct.word, 1.0);
+
+      state.quizOptions.forEach(opt => {
+        const btn = document.getElementById(`quizOptBtn-${opt.id}`);
+        btn.disabled = true;
+        btn.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/40');
+
+        if (opt.id === correct.id) {
+          btn.classList.remove('border-slate-200/90', 'bg-white');
+          btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-950');
+          btn.querySelector('span').classList.add('bg-emerald-500', 'text-white');
+        } else if (opt.id === selectedId && !isCorrect) {
+          btn.classList.remove('border-slate-200/90', 'bg-white');
+          btn.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-950', 'animate-shake');
+          btn.querySelector('span').classList.add('bg-rose-500', 'text-white');
+        } else {
+          btn.classList.add('opacity-55');
+        }
+      });
+
+      const feedbackBox = document.getElementById('quizFeedbackBox');
+      const feedbackTitle = document.getElementById('quizFeedbackTitle');
+      const feedbackDetail = document.getElementById('quizFeedbackDetail');
+      const nextBtn = document.getElementById('quizNextBtn');
+
+      if (isCorrect) {
+        state.quizScore += 10;
+        state.quizCorrectCount += 1;
+        state.quizStreak += 1;
+        if (state.quizStreak > state.quizBestStreak) {
+          state.quizBestStreak = state.quizStreak;
+        }
+        feedbackBox.className = 'mt-6 p-4 rounded-2xl border border-emerald-200 bg-emerald-50/90 animate-pop';
+        feedbackTitle.className = 'font-bold text-sm text-emerald-800 mb-1';
+        feedbackTitle.textContent = '🎉 Chính xác! +10 điểm';
+      } else {
+        state.quizStreak = 0;
+        if (!state.quizWrongWords.some(w => w.id === correct.id)) {
+          state.quizWrongWords.push(correct);
+        }
+        feedbackBox.className = 'mt-6 p-4 rounded-2xl border border-rose-200 bg-rose-50/90 animate-pop';
+        feedbackTitle.className = 'font-bold text-sm text-rose-800 mb-1';
+        feedbackTitle.textContent = '❌ Chưa chính xác rồi!';
+      }
+
+      feedbackDetail.innerHTML = `<strong class="text-slate-900">${escapeHtml(correct.word)}</strong> <span class="font-ipa text-indigo-600">${escapeHtml(correct.ipa)}</span> (${escapeHtml(correct.pos)}) = <strong>${escapeHtml(correct.meaning)}</strong><br><span class="text-slate-500 italic">Ví dụ: ${escapeHtml(correct.exampleEn)} (${escapeHtml(correct.exampleVi)})</span>`;
+      nextBtn.textContent = (state.quizIndex + 1 >= state.quizPool.length) ? 'Xem tổng kết →' : 'Câu tiếp theo →';
+      feedbackBox.classList.remove('hidden');
+
+      updateQuizHeaderMetrics();
+    }
+
+    function nextQuizStep() {
+      if (state.quizIndex + 1 < state.quizPool.length) {
+        state.quizIndex += 1;
+        renderQuizQuestion();
+      } else {
+        showQuizSummary();
+      }
+    }
+
+    function showQuizSummary() {
+      document.getElementById('quizPlayCard').classList.add('hidden');
+      const summaryCard = document.getElementById('quizSummaryCard');
+      summaryCard.classList.remove('hidden');
+
+      const total = state.quizPool.length;
+      const accuracy = total > 0 ? Math.round((state.quizCorrectCount / total) * 100) : 0;
+
+      document.getElementById('quizSummarySubtitle').textContent = `Bạn đã trả lời đúng ${state.quizCorrectCount}/${total} câu hỏi`;
+      document.getElementById('summaryFinalScore').textContent = state.quizScore;
+      document.getElementById('summaryAccuracy').textContent = `${accuracy}%`;
+      document.getElementById('summaryBestStreak').textContent = state.quizBestStreak;
+
+      const wrongWrapper = document.getElementById('quizWrongListWrapper');
+      const wrongList = document.getElementById('quizWrongList');
+      const retryBtn = document.getElementById('retryWrongQuizBtn');
+
+      if (state.quizWrongWords.length > 0) {
+        wrongWrapper.classList.remove('hidden');
+        retryBtn.classList.remove('hidden');
+        document.getElementById('wrongCountBtnText').textContent = state.quizWrongWords.length;
+
+        wrongList.innerHTML = state.quizWrongWords.map(w => `
+          <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-rose-100 text-xs">
+            <div>
+              <strong class="text-slate-900 text-sm">${escapeHtml(w.word)}</strong>
+              <span class="font-ipa text-indigo-600 ml-1">${escapeHtml(w.ipa)}</span>
+              <span class="text-slate-500 block">${escapeHtml(w.meaning)}</span>
+            </div>
+            <button onclick="SpeechManager.speak('${w.word.replace(/'/g, "\\'")}', 1.0, this)" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white font-bold transition cursor-pointer">
+              🔊 Nghe
+            </button>
+          </div>
+        `).join('');
+      } else {
+        wrongWrapper.classList.add('hidden');
+        retryBtn.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // CHẾ ĐỘ 3: NGHE & VIẾT CHÍNH TẢ (DICTATION) + PHÂN TÍCH LỖI TỪNG KÝ TỰ
+    // =========================================================================
+    function nextDictationWord() {
+      const words = getFilteredWordsByTopic();
+      const emptyState = document.getElementById('dictEmptyState');
+      const playCard = document.getElementById('dictPlayCard');
+
+      if (words.length === 0) {
+        emptyState.innerHTML = buildEmptyTopicCardHtml(getTopicById(state.selectedTopic));
+        emptyState.classList.remove('hidden');
+        playCard.classList.add('hidden');
+        state.dictCurrentWord = null;
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      playCard.classList.remove('hidden');
+
+      let candidates = words;
+      if (words.length > 1 && state.dictCurrentWord) {
+        candidates = words.filter(w => w.id !== state.dictCurrentWord.id);
+      }
+
+      state.dictCurrentWord = candidates[Math.floor(Math.random() * candidates.length)];
+      state.dictHintCount = 0;
+      state.dictChecked = false;
+
+      const word = state.dictCurrentWord;
+      const topicObj = getTopicById(word.topic);
+      const colorObj = getTopicColorClasses(topicObj.color);
+
+      const badge = document.getElementById('dictTopicBadge');
+      badge.className = `text-xs font-bold px-3 py-1 rounded-full border ${colorObj.badge}`;
+      badge.textContent = `${topicObj.icon} ${topicObj.name}`;
+
+      document.getElementById('dictPosBadge').textContent = word.pos;
+      updateDictationMeaningUI();
+
+      const input = document.getElementById('dictInput');
+      input.value = '';
+      input.classList.remove('border-emerald-500', 'border-rose-500', 'bg-emerald-50/40', 'bg-rose-50/40', 'animate-shake');
+      input.focus();
+
+      document.getElementById('dictHintDisplay').classList.add('hidden');
+      document.getElementById('dictHintBtn').disabled = false;
+      document.getElementById('dictHintBtn').classList.remove('opacity-50');
+      document.getElementById('dictResultBox').classList.add('hidden');
+
+      setTimeout(() => SpeechManager.speak(word.word, 1.0), 250);
+    }
+
+    function toggleDictationMeaning() {
+      state.dictShowMeaning = !state.dictShowMeaning;
+      updateDictationMeaningUI();
+    }
+
+    function updateDictationMeaningUI() {
+      const meaningEl = document.getElementById('dictMeaningDisplay');
+      const btn = document.getElementById('dictToggleMeaningBtn');
+      if (!state.dictCurrentWord) return;
+
+      if (state.dictShowMeaning) {
+        meaningEl.textContent = state.dictCurrentWord.meaning;
+        meaningEl.classList.remove('text-slate-400', 'italic', 'text-lg');
+        btn.textContent = '👁️ Ẩn gợi ý nghĩa tiếng Việt';
+      } else {
+        meaningEl.textContent = '(Đã ẩn nghĩa — hãy lắng nghe phát âm)';
+        meaningEl.classList.add('text-slate-400', 'italic', 'text-lg');
+        btn.textContent = '👁️ Hiện gợi ý nghĩa tiếng Việt';
+      }
+    }
+
+    function speakDictationWord(rate, btn) {
+      if (state.dictCurrentWord) {
+        SpeechManager.speak(state.dictCurrentWord.word, rate, btn);
+      }
+    }
+
+    function revealDictationHint() {
+      if (!state.dictCurrentWord) return;
+      const target = state.dictCurrentWord.word;
+      const chars = Array.from(target);
+
+      const letterIndices = [];
+      chars.forEach((ch, idx) => {
+        if (!/[\s\-’']/.test(ch)) letterIndices.push(idx);
+      });
+
+      if (state.dictHintCount < letterIndices.length) {
+        state.dictHintCount++;
+      }
+
+      const revealedSet = new Set(letterIndices.slice(0, state.dictHintCount));
+      const masked = chars.map((ch, idx) => {
+        if (ch === ' ') return '  ';
+        if (/[\-’']/.test(ch)) return ch;
+        return revealedSet.has(idx) ? ch : '_';
+      }).join(' ');
+
+      document.getElementById('dictHintText').textContent = masked;
+      document.getElementById('dictHintDisplay').classList.remove('hidden');
+
+      if (state.dictHintCount >= letterIndices.length) {
+        const hintBtn = document.getElementById('dictHintBtn');
+        hintBtn.disabled = true;
+        hintBtn.classList.add('opacity-50');
+      }
+    }
+
+    // So sánh chi tiết từng ký tự: tô xanh ký tự đúng, tô đỏ/vàng ký tự sai hoặc thiếu
+    function buildCharDiffHtml(userStr, targetStr) {
+      const maxLen = Math.max(userStr.length, targetStr.length);
+      let userHtml = '';
+      let targetHtml = '';
+
+      for (let i = 0; i < maxLen; i++) {
+        const uCh = userStr[i];
+        const tCh = targetStr[i];
+
+        if (uCh !== undefined && tCh !== undefined && uCh.toLowerCase() === tCh.toLowerCase()) {
+          userHtml += `<span class="text-emerald-700 font-bold">${escapeHtml(uCh)}</span>`;
+          targetHtml += `<span class="text-emerald-700 font-bold">${escapeHtml(tCh)}</span>`;
+        } else {
+          if (uCh !== undefined) {
+            const displayU = uCh === ' ' ? '␣' : escapeHtml(uCh);
+            userHtml += `<span class="bg-rose-200 text-rose-900 font-extrabold px-0.5 rounded underline decoration-rose-600">${displayU}</span>`;
+          }
+          if (tCh !== undefined) {
+            const displayT = tCh === ' ' ? '␣' : escapeHtml(tCh);
+            targetHtml += `<span class="bg-amber-200 text-slate-900 font-extrabold px-0.5 rounded">${displayT}</span>`;
+          }
+        }
+      }
+
+      return { userHtml, targetHtml };
+    }
+
+    function handleDictationSubmit(event) {
+      event.preventDefault();
+      if (!state.dictCurrentWord) return;
+
+      if (state.dictChecked) {
+        nextDictationWord();
+        return;
+      }
+
+      const input = document.getElementById('dictInput');
+      const userRaw = input.value.trim().replace(/\s+/g, ' ');
+      if (!userRaw) {
+        showToast('Bạn hãy nhập từ tiếng Anh trước khi kiểm tra nhé!', 'warning');
+        input.focus();
+        return;
+      }
+
+      const word = state.dictCurrentWord;
+      const target = word.word.trim().replace(/\s+/g, ' ');
+      const isCorrect = userRaw.toLowerCase() === target.toLowerCase();
+      state.dictChecked = true;
+
+      SpeechManager.speak(word.word, 1.0);
+      const resultBox = document.getElementById('dictResultBox');
+
+      if (isCorrect) {
+        input.classList.add('border-emerald-500', 'bg-emerald-50/40');
+        resultBox.className = 'mt-6 p-5 rounded-2xl border border-emerald-200 bg-emerald-50/85 animate-pop';
+        resultBox.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-emerald-800 font-extrabold text-base mb-1">🎉 Tuyệt vời! Bạn viết hoàn toàn chính xác!</p>
+              <p class="text-sm text-slate-700"><strong class="text-lg text-slate-900">${escapeHtml(word.word)}</strong> · <span class="font-ipa text-indigo-600 font-medium">${escapeHtml(word.ipa)}</span> (${escapeHtml(word.meaning)})</p>
+              <p class="text-xs text-slate-500 mt-1">Ví dụ: <span class="font-medium text-slate-700">${escapeHtml(word.exampleEn)}</span> — ${escapeHtml(word.exampleVi)}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="markDictationLearned('${word.id}')" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                ✓ Đánh dấu đã thuộc
+              </button>
+              <button type="button" onclick="nextDictationWord()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                Từ tiếp theo →
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const diff = buildCharDiffHtml(userRaw, target);
+        input.classList.add('border-rose-500', 'bg-rose-50/40', 'animate-shake');
+        resultBox.className = 'mt-6 p-5 rounded-2xl border border-rose-200 bg-rose-50/85 animate-pop';
+        resultBox.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+              <p class="text-rose-800 font-extrabold text-base">❌ Chưa đúng chính tả rồi, xem chi tiết từng ký tự nhé!</p>
+              <div class="text-xs sm:text-sm bg-white/95 px-3 py-2 rounded-xl border border-rose-100 space-y-1">
+                <p class="text-slate-600">Bạn đã gõ: <span class="font-ipa text-base tracking-wide">${diff.userHtml}</span></p>
+                <p class="text-slate-700">Đáp án chuẩn: <span class="font-ipa text-base tracking-wide">${diff.targetHtml}</span> <span class="font-ipa text-indigo-600 text-xs font-medium ml-1">${escapeHtml(word.ipa)}</span></p>
+              </div>
+              <p class="text-xs text-slate-600">Nghĩa: <strong>${escapeHtml(word.meaning)}</strong> · <span class="italic">${escapeHtml(word.exampleEn)}</span></p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="retryCurrentDictation()" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer">
+                Gõ lại từ này
+              </button>
+              <button type="button" onclick="nextDictationWord()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                Từ tiếp theo →
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      resultBox.classList.remove('hidden');
+    }
+
+    function retryCurrentDictation() {
+      state.dictChecked = false;
+      const input = document.getElementById('dictInput');
+      input.value = '';
+      input.classList.remove('border-emerald-500', 'border-rose-500', 'bg-emerald-50/40', 'bg-rose-50/40', 'animate-shake');
+      input.focus();
+      document.getElementById('dictResultBox').classList.add('hidden');
+      SpeechManager.speak(state.dictCurrentWord.word, 0.7);
+    }
+
+    function markDictationLearned(wordId) {
+      state.learnedIds.add(wordId);
+      saveToStorage();
+      showToast('Đã lưu từ vào danh sách Đã thuộc!', 'success');
+      nextDictationWord();
+    }
+
+    // =========================================================================
+    // CHẾ ĐỘ 4: KHO TỪ VỰNG (VOCABULARY LIBRARY & CRUD)
+    // =========================================================================
+    function renderLibrary() {
+      const searchQuery = document.getElementById('librarySearchInput').value.trim().toLowerCase();
+      const statusFilter = document.getElementById('libraryStatusFilter').value;
+
+      let words = getFilteredWordsByTopic();
+
+      if (statusFilter === 'learned') {
+        words = words.filter(w => state.learnedIds.has(w.id));
+      } else if (statusFilter === 'unlearned') {
+        words = words.filter(w => !state.learnedIds.has(w.id));
+      }
+
+      if (searchQuery) {
+        words = words.filter(w =>
+          w.word.toLowerCase().includes(searchQuery) ||
+          w.ipa.toLowerCase().includes(searchQuery) ||
+          w.meaning.toLowerCase().includes(searchQuery) ||
+          (w.exampleEn && w.exampleEn.toLowerCase().includes(searchQuery)) ||
+          (w.exampleVi && w.exampleVi.toLowerCase().includes(searchQuery))
+        );
+      }
+
+      const grid = document.getElementById('libraryGrid');
+      const emptyState = document.getElementById('libraryEmptyState');
+      document.getElementById('libraryCountInfo').textContent = `Hiển thị ${words.length} từ vựng`;
+
+      if (words.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = words.map(word => {
+        const isLearned = state.learnedIds.has(word.id);
+        const topicObj = getTopicById(word.topic);
+        const colorObj = getTopicColorClasses(topicObj.color);
+        const safeWord = word.word.replace(/'/g, "\\'");
+        const safeEx = (word.exampleEn || '').replace(/'/g, "\\'");
+
+        return `
+          <div class="bg-white rounded-3xl p-5 border ${isLearned ? 'border-emerald-200' : 'border-slate-200/90'} shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              <!-- Hàng trên: Chủ đề, Loại từ, Sửa & Xóa -->
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border truncate max-w-[165px] ${colorObj.badge}">
+                  ${escapeHtml(topicObj.icon)} ${escapeHtml(topicObj.name)}
+                </span>
+                <div class="flex items-center gap-1 shrink-0">
+                  <span class="font-ipa text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">${escapeHtml(word.pos)}</span>
+                  <button onclick="openWordFormModal('${word.id}')" title="Chỉnh sửa từ vựng" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button onclick="deleteWordById('${word.id}')" title="Xóa từ vựng" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Từ tiếng Anh, IPA & Nút loa -->
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-xl font-extrabold text-slate-900 leading-snug">${escapeHtml(word.word)}</h3>
+                  <p class="font-ipa text-xs font-medium text-indigo-600">${escapeHtml(word.ipa)}</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button onclick="SpeechManager.speak('${safeWord}', 1.0, this)" title="Đọc chuẩn (1.0x)" class="w-9 h-9 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white flex items-center justify-center transition cursor-pointer">
+                    🔊
+                  </button>
+                  <button onclick="SpeechManager.speak('${safeWord}', 0.7, this)" title="Đọc chậm (0.7x)" class="px-2 h-9 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 text-xs font-bold border border-slate-200/80 transition cursor-pointer">
+                    0.7x
+                  </button>
+                </div>
+              </div>
+
+              <!-- Nghĩa tiếng Việt -->
+              <p class="text-sm sm:text-base font-bold text-slate-800 mb-3">${escapeHtml(word.meaning)}</p>
+
+              <!-- Câu ví dụ song ngữ -->
+              ${word.exampleEn ? `
+                <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/70 mb-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <div>
+                      <p class="text-xs font-bold text-slate-800 mb-0.5">${escapeHtml(word.exampleEn)}</p>
+                      <p class="text-xs text-slate-500">${escapeHtml(word.exampleVi)}</p>
+                    </div>
+                    <button onclick="SpeechManager.speak('${safeEx}', 1.0, this)" title="Nghe câu ví dụ" class="shrink-0 p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-100 transition cursor-pointer">
+                      🔊
+                    </button>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Nút bật/tắt trạng thái Đã thuộc -->
+            <button
+              onclick="toggleWordLearnedStatus('${word.id}')"
+              class="w-full py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                isLearned
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                  : 'bg-slate-50 text-slate-600 border border-slate-200/90 hover:border-indigo-300 hover:text-indigo-700'
+              }"
+            >
+              ${isLearned ? '✓ Đã thuộc từ này' : '○ Đánh dấu đã thuộc'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleWordLearnedStatus(wordId) {
+      if (state.learnedIds.has(wordId)) {
+        state.learnedIds.delete(wordId);
+        showToast('Đã chuyển về trạng thái Chưa thuộc', 'info');
+      } else {
+        state.learnedIds.add(wordId);
+        showToast('Đã đánh dấu Đã thuộc!', 'success');
+      }
+      saveToStorage();
+      renderLibrary();
+    }
+
+    function deleteWordById(wordId) {
+      const isCustom = state.customWords.some(w => w.id === wordId);
+      if (isCustom) {
+        state.customWords = state.customWords.filter(w => w.id !== wordId);
+      } else {
+        state.deletedDefaultIds.add(wordId);
+      }
+      state.learnedIds.delete(wordId);
+      saveToStorage();
+      renderTopicPills();
+      renderLibrary();
+      showToast('Đã xóa từ vựng khỏi kho.', 'info');
+    }
+
+    // =========================================================================
+    // MODAL THÊM / SỬA TỪ ĐƠN LẺ & THÊM HÀNG LOẠT (BULK IMPORT)
+    // =========================================================================
+    function openWordFormModal(editWordId = null, preferredTopicId = null) {
+      const modal = document.getElementById('wordFormModal');
+      const form = document.getElementById('wordForm');
+      form.reset();
+      toggleQuickTopicBox('word', false);
+
+      const topicSelect = document.getElementById('wordTopicSelect');
+
+      if (editWordId) {
+        const wordObj = getAllWords().find(w => w.id === editWordId);
+        if (!wordObj) return;
+
+        document.getElementById('wordModalTitle').innerHTML = `
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">✏️</span>
+          <span>Chỉnh sửa từ vựng</span>
+        `;
+        document.getElementById('wordFormSubmitBtn').textContent = 'Cập nhật từ vựng';
+        document.getElementById('editingWordId').value = wordObj.id;
+        document.getElementById('wordEnInput').value = wordObj.word;
+        document.getElementById('wordIpaInput').value = wordObj.ipa;
+        document.getElementById('wordMeaningInput').value = wordObj.meaning;
+        document.getElementById('wordPosInput').value = wordObj.pos;
+        document.getElementById('wordExampleEnInput').value = wordObj.exampleEn || '';
+        document.getElementById('wordExampleViInput').value = wordObj.exampleVi || '';
+
+        populateTopicSelectDropdown(topicSelect, wordObj.topic);
+      } else {
+        document.getElementById('wordModalTitle').innerHTML = `
+          <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-base">✨</span>
+          <span>Thêm từ vựng tiếng Anh mới</span>
+        `;
+        document.getElementById('wordFormSubmitBtn').textContent = 'Lưu từ vựng';
+        document.getElementById('editingWordId').value = '';
+        populateTopicSelectDropdown(topicSelect, preferredTopicId);
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('wordEnInput').focus(), 60);
+    }
+
+    function closeWordFormModal() {
+      const modal = document.getElementById('wordFormModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleWordFormSubmit(event) {
+      event.preventDefault();
+      const editingId = document.getElementById('editingWordId').value.trim();
+      const word = document.getElementById('wordEnInput').value.trim();
+      let ipa = document.getElementById('wordIpaInput').value.trim();
+      const meaning = document.getElementById('wordMeaningInput').value.trim();
+      const pos = document.getElementById('wordPosInput').value;
+      const topic = String(document.getElementById('wordTopicSelect').value);
+      const exampleEn = document.getElementById('wordExampleEnInput').value.trim();
+      const exampleVi = document.getElementById('wordExampleViInput').value.trim();
+
+      if (!word || !ipa || !meaning) return;
+
+      if (!ipa.startsWith('/')) ipa = '/' + ipa;
+      if (!ipa.endsWith('/')) ipa = ipa + '/';
+
+      if (editingId) {
+        const customIdx = state.customWords.findIndex(w => w.id === editingId);
+        if (customIdx !== -1) {
+          state.customWords[customIdx] = {
+            ...state.customWords[customIdx],
+            word, ipa, meaning, pos, topic,
+            exampleEn: exampleEn || `We learned the word "${word}" today.`,
+            exampleVi: exampleVi || `Hôm nay chúng tôi đã học từ "${word}".`
+          };
+        } else {
+          state.editedDefaults[editingId] = {
+            word, ipa, meaning, pos, topic,
+            exampleEn: exampleEn || `We learned the word "${word}" today.`,
+            exampleVi: exampleVi || `Hôm nay chúng tôi đã học từ "${word}".`
+          };
+        }
+        saveToStorage();
+        refreshAllViews();
+        closeWordFormModal();
+        showToast(`Đã cập nhật từ "${word}"!`, 'success');
+      } else {
+        const newEntry = {
+          id: 'custom_en_' + Date.now(),
+          topic,
+          word,
+          ipa,
+          pos,
+          meaning,
+          exampleEn: exampleEn || `We learned the word "${word}" today.`,
+          exampleVi: exampleVi || `Hôm nay chúng tôi đã học từ "${word}".`,
+          isCustom: true
+        };
+        state.customWords.unshift(newEntry);
+        saveToStorage();
+        refreshAllViews();
+        closeWordFormModal();
+        showToast(`Đã thêm từ mới "${word}" vào chủ đề!`, 'success');
+      }
+    }
+
+    // Bulk Import
+    function openBulkImportModal(preferredTopicId = null) {
+      const modal = document.getElementById('bulkImportModal');
+      document.getElementById('bulkTextarea').value = '';
+      toggleQuickTopicBox('bulk', false);
+      populateTopicSelectDropdown(document.getElementById('bulkTopicSelect'), preferredTopicId);
+      updateBulkPreviewCount();
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('bulkTextarea').focus(), 60);
+    }
+
+    function closeBulkImportModal() {
+      const modal = document.getElementById('bulkImportModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function fillBulkSample() {
+      const sample = [
+        'innovative | /ˈɪnəveɪtɪv/ | Đổi mới, sáng tạo | adj | Their team proposed an innovative solution. | Nhóm của họ đã đề xuất một giải pháp sáng tạo.',
+        'consensus | /kənˈsensəs/ | Sự đồng thuận | noun | We finally reached a consensus after the meeting. | Cuối cùng chúng tôi đã đạt được sự đồng thuận sau cuộc họp.',
+        'implement | /ˈɪmplɪment/ | Triển khai, thực hiện | verb | The company will implement the new policy next week. | Công ty sẽ triển khai chính sách mới vào tuần tới.'
+      ].join('\n');
+      document.getElementById('bulkTextarea').value = sample;
+      updateBulkPreviewCount();
+    }
+
+    function parseBulkLines(rawText) {
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const parsed = [];
+
+      lines.forEach(line => {
+        const parts = line.split('|').map(p => p.trim());
+        // Tối thiểu: Tiếng Anh | Phiên âm IPA | Nghĩa tiếng Việt
+        if (parts.length >= 3 && parts[0] && parts[2]) {
+          let ipa = parts[1] || '';
+          if (ipa && !ipa.startsWith('/')) ipa = '/' + ipa;
+          if (ipa && !ipa.endsWith('/')) ipa = ipa + '/';
+
+          parsed.push({
+            word: parts[0],
+            ipa: ipa || '/.../',
+            meaning: parts[2],
+            pos: parts[3] || 'noun',
+            exampleEn: parts[4] || `We practiced using "${parts[0]}" in context.`,
+            exampleVi: parts[5] || parts[2]
+          });
+        }
+      });
+      return parsed;
+    }
+
+    function updateBulkPreviewCount() {
+      const raw = document.getElementById('bulkTextarea').value;
+      const items = parseBulkLines(raw);
+      document.getElementById('bulkParsedCount').textContent = `${items.length} từ hợp lệ`;
+    }
+
+    function handleBulkImportSubmit(event) {
+      event.preventDefault();
+      const raw = document.getElementById('bulkTextarea').value;
+      const items = parseBulkLines(raw);
+
+      if (items.length === 0) {
+        showToast('Chưa có dòng từ vựng hợp lệ nào! Hãy kiểm tra dấu ngăn cách | nhé.', 'warning');
+        return;
+      }
+
+      const targetTopic = String(document.getElementById('bulkTopicSelect').value);
+      const baseTime = Date.now();
+
+      const newEntries = items.map((item, idx) => ({
+        id: `bulk_en_${baseTime}_${idx}`,
+        topic: targetTopic,
+        word: item.word,
+        ipa: item.ipa,
+        pos: item.pos,
+        meaning: item.meaning,
+        exampleEn: item.exampleEn,
+        exampleVi: item.exampleVi,
+        isCustom: true
+      }));
+
+      state.customWords = [...newEntries, ...state.customWords];
+      saveToStorage();
+      refreshAllViews();
+      closeBulkImportModal();
+      showToast(`Đã nhập thành công ${newEntries.length} từ vựng mới!`, 'success');
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    // =========================================================================
+    // PHÍM TẮT (SPACE, A, MŨI TÊN, PHÍM 1-4) & VUỐT CẢM ỨNG MOBILE
+    // =========================================================================
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      const anyModalOpen = ['topicManagerModal', 'wordFormModal', 'bulkImportModal', 'jsonModal']
+        .some(id => !document.getElementById(id).classList.contains('hidden'));
+      if (anyModalOpen) return;
+
+      if (state.currentMode === 'flashcards' && state.fcQueue.length > 0) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          flipFlashcard();
+        } else if (e.code === 'KeyA') {
+          e.preventDefault();
+          speakCurrentFlashcard(1.0, document.getElementById('fcSpeakNormal'));
+        } else if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          nextFlashcard();
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          prevFlashcard();
+        }
+      } else if (state.currentMode === 'quiz' && !document.getElementById('quizPlayCard').classList.contains('hidden')) {
+        if (['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code) && !state.quizAnswered) {
+          const idx = Number(e.code.replace('Digit', '')) - 1;
+          if (state.quizOptions[idx]) {
+            e.preventDefault();
+            submitQuizAnswer(state.quizOptions[idx].id);
+          }
+        } else if (e.code === 'Enter' && state.quizAnswered) {
+          e.preventDefault();
+          nextQuizStep();
+        }
+      }
+    });
+
+    // Vuốt cảm ứng trái/phải cho Flashcard
+    let touchStartX = 0;
+    const fcWrapper = document.getElementById('flashcardWrapper');
+    fcWrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    fcWrapper.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 55) {
+        if (diff < 0) nextFlashcard();
+        else prevFlashcard();
+      }
+    }, { passive: true });
+
+    // =========================================================================
+    // KHỞI CHẠY ỨNG DỤNG
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      SpeechManager.init();
+      updateAccentButtonsUI();
+      updateHeaderStats();
+      renderTopicPills();
+      initFlashcards();
+    });
+  </script>
+</body>
+</html>
